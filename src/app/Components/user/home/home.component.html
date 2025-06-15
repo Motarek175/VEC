@@ -1,0 +1,450 @@
+<div class="mx-auto px-2 md:py-2 lg:px-8 lg:py-0">
+  <!-- Start Recommendation -->
+  <div
+    class="my-5"
+    *ngIf="
+      _UserAuthService.isUserLogin.getValue() &&
+      (recommendedProducts().length > 0 || recommendationsLoading())
+    "
+  >
+    <h2
+      class="pl-5 mb-5 relative text-2xl font-semibold text-[var(--main-color)] before:absolute before:bg-[var(--main-color)] before:content-[''] before:h-full before:w-3.5 before:rounded before:left-0"
+    >
+      Recommendation
+    </h2>
+    <h2 class="text-3xl text-black font-bold mb-5">Just For You</h2>
+
+    <!-- Loading State -->
+    <div
+      *ngIf="recommendationsLoading()"
+      class="text-center py-12 animate-pulse"
+    >
+      <p class="text-xl font-semibold text-gray-600">Loading...</p>
+    </div>
+
+    <!-- Recommended Products -->
+    <div
+      *ngIf="!recommendationsLoading() && recommendedProducts().length > 0"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mx-5"
+    >
+      @for (product of recommendedProducts(); track product.id) {
+      <div
+        class="relative cursor-pointer rounded-lg bg-white shadow-xl transition-shadow duration-300 transform product-card"
+      >
+        <!-- Image and Wishlist Button -->
+        <div class="group relative overflow-hidden rounded-t-lg">
+          <button
+            (click)="toggleWishlist(product.id)"
+            class="absolute outline-0 right-2 top-2 bg-white px-2 py-1 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-300 z-10"
+            [ngClass]="{
+              'opacity-50 cursor-not-allowed':
+                !_UserAuthService.isUserLogin.value,
+              'hover:text-red-600':
+                _UserAuthService.isUserLogin.value && !isInWishlist(product.id),
+              'text-red-600': isInWishlist(product.id)
+            }"
+          >
+            <i
+              class="text-xl transition-all duration-300 fa-solid fa-heart"
+            ></i>
+          </button>
+
+          <a [routerLink]="['/product', product.id]">
+            <img
+              class="w-full object-fit transition-transform duration-300 group-hover:scale-105"
+              style="height: 220px"
+              [src]="
+                product.image && product.image.startsWith('//')
+                  ? 'https:' + product.image
+                  : product.image || 'https://fakeimg.pl/300/'
+              "
+              [alt]="product.title"
+              (error)="onImageError($event)"
+            />
+          </a>
+        </div>
+
+        <!-- Card Content -->
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h5
+              class="text-lg md:text-xl font-semibold text-gray-600 truncate"
+              [title]="product.title"
+              [routerLink]="['/product', product.id]"
+            >
+              {{ product.title }}
+            </h5>
+            <span
+              class="text-xs md:text-sm text-gray-500 ml-2 whitespace-nowrap"
+            >
+              {{ product.category }}
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2 mb-2">
+            <span class="font-semibold text-md md:text-xl text-gray-600"
+              >Status:</span
+            >
+            <span
+              class="px-2 py-1 rounded text-xs md:text-sm font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-800': product.status === 'Active',
+                'bg-yellow-100 text-yellow-800': product.status === 'Pending'
+              }"
+            >
+              {{ product.status }}
+            </span>
+          </div>
+
+          <div class="text-md md:text-lg font-medium text-gray-600">
+            <span
+              class="mr-2"
+              [ngClass]="{
+                'line-through text-gray-400': product.discount > 0,
+                'text-gray-600': product.discount === 0
+              }"
+            >
+              Price: ${{ product.unitPrice | number : "1.2-2" }}
+            </span>
+            <!-- Show sellPrice if discount exists -->
+            <span
+              *ngIf="product.discount > 0"
+              class="text-green-600 font-semibold ml-2"
+            >
+              ${{ product.sellPrice | number : "1.2-2" }}
+            </span>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  <!-- ------------------------*------------------------ -->
+
+  <!-- Start Landing -->
+  <div class="relative w-full mx-auto overflow-hidden mb-3 rounded-md">
+    <div
+      class="flex transition-transform duration-500 ease-in-out"
+      [ngStyle]="{
+        transform: 'translateX(-' + currentIndexLanding * 100 + '%)'
+      }"
+    >
+      <div
+        *ngFor="let img of images"
+        class="w-full relative h-fit flex-shrink-0 text-center"
+      >
+        <h2
+          class="absolute top-1/2 left-1/2 -translate-1/2 text-white opacity-100 z-10 text-xl md:text-2xl md:tracking-widest font-medium"
+        >
+          Shine the latest fashion this season
+        </h2>
+        <button
+          class="rounded-md px-4 py-1 bg-[var(--main-color)] text-white absolute top-[60%] cursor-pointer text-xl left-1/2 -translate-x-1/2 z-10"
+          routerLink="/shop"
+        >
+          Shop Now
+        </button>
+        <img [src]="img.imageUrl" class="w-full h-[500px]" />
+        <span
+          class="w-full h-full bg-black opacity-40 absolute top-0 left-0"
+        ></span>
+      </div>
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button
+      (click)="prevLandingSlide()"
+      class="absolute cursor-pointer top-1/2 left-5 md:left-20 -translate-y-1/2 bg-white w-10 h-10 rounded-full bg-opacity-50 p-2 rounded-full"
+    >
+      ❮
+    </button>
+    <button
+      (click)="nextLandingSlide()"
+      class="absolute cursor-pointer top-1/2 right-5 md:right-20 -translate-y-1/2 bg-white w-10 h-10 rounded-full bg-opacity-50 p-2 rounded-full"
+    >
+      ❯
+    </button>
+    <!-- Indicators -->
+    <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+      <span
+        *ngFor="let img of images; let i = index"
+        class="w-8 h-1"
+        [class.bg-white]="i === currentIndexLanding"
+        [class.bg-gray-500]="i !== currentIndexLanding"
+      ></span>
+    </div>
+  </div>
+  <!-- ------------------------*------------------------ -->
+
+  <!-- Start Popular Products -->
+  <div class="mt-10 mb-5">
+    <h2
+      class="pl-5 mb-5 relative text-2xl font-semibold text-[var(--main-color)] before:absolute before:bg-[var(--main-color)] before:content-[''] before:h-full before:w-3.5 before:rounded before:left-0"
+    >
+      Popular Products
+    </h2>
+    <h2 class="text-3xl text-black font-bold mb-5">Popular Products</h2>
+    <div>
+      <div *ngIf="loading()" class="text-center py-12 animate-pulse">
+        <p class="text-xl font-semibold text-gray-600">Loading...</p>
+      </div>
+      <div
+        *ngIf="!loading() && popularProducts.length === 0"
+        class="text-center py-12 animate-pulse"
+      >
+        <i class="fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"></i>
+        <p class="text-xl font-semibold text-gray-600">No products found</p>
+      </div>
+      <div *ngIf="!loading() && popularProducts.length > 0" class="relative">
+        <div
+          class="overflow-hidden w-full"
+          style="max-height: 500px; position: relative"
+        >
+          <!-- Carousel slides container -->
+          <div
+            class="flex w-full p-2 transition-transform duration-300 ease-in-out flex-nowrap gap-4"
+            [style.transform]="'translateX(-' + currentSlideOffset() + 'px)'"
+            #carouselContainer
+          >
+            @for (product of popularProducts; track product.id) {
+            <div
+              class="relative cursor-pointer rounded-lg bg-white shadow-xl transition-shadow duration-300 transform flex-shrink-0 product-card"
+              [style.width.px]="slideWidth"
+              [style.min-width.px]="slideWidth"
+              [style.margin-right.px]="slideGap"
+            >
+              <!-- Responsive image height -->
+              <div class="group relative overflow-hidden rounded-t-lg">
+                <button
+                  (click)="toggleWishlist(product.id)"
+                  class="absolute outline-0 right-2 top-2 bg-white px-2 py-1 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-300 z-10"
+                  [ngClass]="{
+                    'opacity-50 cursor-not-allowed':
+                      !_UserAuthService.isUserLogin.value,
+                    'hover:text-red-600':
+                      _UserAuthService.isUserLogin.value &&
+                      !isInWishlist(product.id),
+                    'text-red-600': isInWishlist(product.id)
+                  }"
+                >
+                  <i
+                    class="text-xl transition-all duration-300 fa-solid fa-heart"
+                  ></i>
+                </button>
+
+                <a [routerLink]="['/product', product.id]">
+                  <img
+                    class="w-full object-fit transition-transform duration-300 group-hover:scale-105"
+                    style="height: 220px"
+                    [src]="product.imageUrl"
+                    [alt]="product.title"
+                    (error)="onImageError($event)"
+                  />
+                </a>
+              </div>
+              <div class="p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <h5
+                    class="text-lg md:text-xl font-semibold text-gray-600 truncate"
+                    [title]="product.title"
+                    [routerLink]="['/product', product.id]"
+                  >
+                    {{ product.title }}
+                  </h5>
+                  <span
+                    class="text-xs md:text-sm text-gray-500 ml-2 whitespace-nowrap"
+                    >{{ product.category }}</span
+                  >
+                </div>
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="font-semibold text-md md:text-xl text-gray-600"
+                    >Status:</span
+                  >
+                  <span
+                    class="px-2 py-1 rounded text-xs md:text-sm font-medium"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800':
+                        product.status === 'Active',
+                      'bg-yellow-100 text-yellow-800':
+                        product.status === 'Pending'
+                    }"
+                  >
+                    {{ product.status }}
+                  </span>
+                </div>
+                <div class="text-md md:text-lg font-medium text-gray-600">
+                  <span
+                    class="mr-2"
+                    [ngClass]="{
+                      'line-through text-gray-400': product.discount > 0,
+                      'text-gray-600': product.discount === 0
+                    }"
+                  >
+                    Price: ${{ product.unitPrice | number : "1.2-2" }}
+                  </span>
+                  <!-- Show sellPrice if discount exists -->
+                  <span
+                    *ngIf="product.discount > 0"
+                    class="text-green-600 font-semibold ml-2"
+                  >
+                    ${{
+                      product.unitPrice * (1 - product.discount / 100)
+                        | number : "1.2-2"
+                    }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <button
+          (click)="prevSlide()"
+          [disabled]="currentIndex() === 0"
+          class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md carousel-arrow"
+          [ngClass]="{
+            'opacity-50 cursor-not-allowed': currentIndex() === 0,
+            'hover:bg-gray-100': currentIndex() !== 0
+          }"
+        >
+          <i class="fa-solid fa-chevron-left text-gray-600"></i>
+        </button>
+        <button
+          (click)="nextSlide()"
+          [disabled]="currentIndex() >= maxIndex()"
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md carousel-arrow"
+          [ngClass]="{
+            'opacity-50 cursor-not-allowed': currentIndex() >= maxIndex(),
+            'hover:bg-gray-100': currentIndex() < maxIndex()
+          }"
+        >
+          <i class="fa-solid fa-chevron-right text-gray-600"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- ------------------------*------------------------ -->
+
+  <!-- Start Discount -->
+  <div class="relative w-full mx-auto overflow-hidden rounded-md mt-10 mb-5">
+    <img src="./assets/image4.png" class="w-full h-[500px]" />
+    <div
+      class="flex w-fit gap-5 flex-col absolute z-10 left-2 md:left-12 top-1/2 -translate-y-1/2"
+    >
+      <h2 class="text-[#BA8C8C] font-bold text-xl sm:text-3xl">Categories</h2>
+      <h2
+        class="text-white text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-medium"
+      >
+        Take advantage <br />
+        of discounts
+      </h2>
+      <button
+        class="w-fit cursor-pointer bg-[var(--main-color)] text-white font-medium text-center px-4 py-3 rounded-xl text-lg sm:text-xl"
+        routerLink="/shop"
+      >
+        Shop Now
+      </button>
+    </div>
+    <span
+      class="w-full h-full bg-[#333333] opacity-60 absolute top-0 left-0"
+    ></span>
+  </div>
+  <!-- ------------------------*------------------------ -->
+  <!-- Start Our Products -->
+  <div class="mt-10 mb-5">
+    <h2
+      class="pl-5 mb-5 relative text-2xl font-semibold text-[var(--main-color)] before:absolute before:bg-[var(--main-color)] before:content-[''] before:h-full before:w-3.5 before:rounded before:left-0"
+    >
+      Our Products
+    </h2>
+    <h2 class="text-3xl text-black font-bold mb-5">Explore Our Products</h2>
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-8"
+    >
+      @for (product of randomProducts; track product.id) {
+      <div
+        class="relative rounded-lg bg-white cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+      >
+        <button
+          (click)="toggleWishlist(product.id)"
+          class="absolute outline-0 right-2 top-2 bg-white px-2 py-1 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-300"
+          [ngClass]="{
+            'opacity-50 cursor-not-allowed':
+              !_UserAuthService.isUserLogin.value,
+            'hover:text-red-600':
+              _UserAuthService.isUserLogin.value && !isInWishlist(product.id),
+            'text-red-600': isInWishlist(product.id)
+          }"
+        >
+          <i class="text-xl transition-all duration-300 fa-solid fa-heart"></i>
+        </button>
+        <a [routerLink]="['/product', product.id]">
+          <img
+            class="rounded-t-lg w-full h-72 object-fill"
+            [src]="product.imageUrl"
+            [alt]="product.title"
+            (error)="onImageError($event)"
+          />
+        </a>
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h5
+              class="text-xl font-semibold text-gray-600"
+              [title]="product.title"
+              [routerLink]="['/product', product.id]"
+            >
+              {{ product.title }}
+            </h5>
+            <span class="text-sm text-gray-500">{{ product.category }}</span>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="font-semibold text-xl text-gray-600">Status:</span>
+            <span
+              class="px-2 py-1 rounded text-sm font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-800': product.status === 'Active',
+                'bg-yellow-100 text-yellow-800': product.status === 'Pending'
+              }"
+            >
+              {{ product.status }}
+            </span>
+          </div>
+          <div class="text-lg font-medium text-gray-600">
+            <span
+              class="mr-2"
+              [ngClass]="{
+                'line-through text-gray-400': product.discount > 0,
+                'text-gray-600': product.discount === 0
+              }"
+            >
+              Price: ${{ product.unitPrice | number : "1.2-2" }}
+            </span>
+            <!-- Show sellPrice if discount exists -->
+            <span
+              *ngIf="product.discount > 0"
+              class="text-green-600 font-semibold ml-2"
+            >
+              ${{
+                product.unitPrice * (1 - product.discount / 100)
+                  | number : "1.2-2"
+              }}
+            </span>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+    <!-- Show More Button -->
+    <div class="text-center mt-8">
+      <button
+        [routerLink]="['/shop']"
+        class="cursor-pointer font-semibold bg-[var(--main-color)] text-white px-6 py-3 rounded-lg hover:bg-opacity-90"
+      >
+        Show More
+      </button>
+    </div>
+  </div>
+  <!-- ------------------------*------------------------ -->
+</div>

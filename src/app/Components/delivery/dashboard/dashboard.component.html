@@ -1,0 +1,332 @@
+<div class="flex flex-col md:flex-row">
+  <!-- Sidebar -->
+  <div class="relative">
+    <aside
+      class="w-full md:min-h-[100vh] md:w-84 bg-[var(--main-color)] text-white"
+    >
+      <div class="p-4 pb-0">
+        <h2 class="text-xl font-bold mb-4">Delivery Dashboard</h2>
+        <nav>
+          <ul>
+            <!-- Home -->
+            <li>
+              <a
+                (click)="setView('home')"
+                class="block p-2 rounded cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md"
+                [class.bg-gray-500]="view === 'home'"
+              >
+                <i class="fa-solid fa-home mr-2"></i> Home
+              </a>
+            </li>
+            <!-- All Orders -->
+            <li>
+              <a
+                (click)="setView('list')"
+                class="block p-2 rounded cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md"
+                [class.bg-gray-500]="view === 'list' || view === 'details'"
+              >
+                <i class="fa-solid fa-truck mr-2"></i> All Orders
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <!-- Profile Section -->
+      <div
+        class="flex w-full flex-col gap-3 px-4 pb-4 pt-0 md:p-4 bg-[var(--main-color)] relative md:absolute md:bottom-0"
+      >
+        <div class="md:flex-row hidden md:flex">
+          <div
+            class="w-12 h-12 bg-white rounded-full flex flex-row items-center justify-center text-[var(--main-color)] font-bold text-xl"
+          >
+            {{ this.deliveryPersonName[0] }}
+          </div>
+          <div class="flex flex-row items-center justify-between flex-1">
+            <div class="ml-3">
+              <p class="font-semibold text-lg">{{ deliveryPersonName }}</p>
+              <p class="text-sm text-gray-300">{{ this.decodedToken.Role }}</p>
+            </div>
+            <div>
+              <a
+                (click)="this._UserAuthService.logout()"
+                class="text-xl cursor-pointer"
+              >
+                <i class="fa-solid fa-arrow-right-from-bracket text-2xl"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <!-- Main Content -->
+  <div class="p-4 w-full">
+    <!-- Home View -->
+    <div *ngIf="view === 'home'" class="px-4 animate-fade-in">
+      <h1 class="text-3xl font-bold mb-4 text-gray-800 tracking-tight">
+        Welcome {{ deliveryPersonName }} to Delivery Dashboard
+      </h1>
+      <p class="text-gray-600 mb-6 leading-relaxed">
+        Manage your deliveries efficiently. Click "All Orders" in the sidebar to
+        view and track your assigned orders.
+      </p>
+      <img
+        src="./assets/welcome.jpg"
+        alt="Welcome"
+        class="mx-auto w-[400px] rounded-lg"
+      />
+    </div>
+
+    <!-- Orders List View -->
+    <div *ngIf="view === 'list'" class="grid gap-4 animate-fade-in">
+      <h1 class="text-3xl font-bold mb-4 text-gray-800 tracking-tight">
+        All Orders
+      </h1>
+      <!-- No Orders Message -->
+      <div
+        *ngIf="orders.length === 0"
+        class="p-4 bg-red-100 text-red-700 rounded-lg mb-4 animate-fade-in text-center"
+      >
+        No order assigned to you yet
+      </div>
+      <!-- Orders and Pagination -->
+      <div *ngIf="orders.length > 0" class="flex flex-col gap-4">
+        <div
+          *ngFor="let order of paginatedOrders"
+          (click)="selectOrder(order)"
+          class="p-4 border rounded-lg cursor-pointer bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+        >
+          <div class="flex justify-between">
+            <div>
+              <h3 class="font-semibold text-lg text-gray-800">
+                {{ order.customerName }}
+              </h3>
+              <p class="text-sm text-gray-500">{{ order.deliveryAddress }}</p>
+              <p class="text-sm text-gray-500">Order #{{ order.id }}</p>
+            </div>
+            <div class="text-right">
+              <span
+                class="px-2 py-1 rounded text-sm font-medium"
+                [ngClass]="{
+                  'bg-yellow-100 text-yellow-800': order.status === 'pending',
+                  'bg-orange-100 text-orange-800': order.status === 'preparing',
+                  'bg-blue-100 text-blue-800': order.status === 'in-progress',
+                  'bg-green-100 text-green-800': order.status === 'recieved'
+                }"
+              >
+                {{
+                  order.status === "in-progress"
+                    ? "On Way"
+                    : order.status === "recieved"
+                    ? "Received"
+                    : (order.status | titlecase)
+                }}
+              </span>
+              <p class="text-sm text-gray-500" *ngIf="order.orderDate">
+                {{ order.orderDate | date : "short" }}
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Pagination -->
+        <div class="mt-6 flex justify-center items-center gap-2">
+          <button
+            (click)="changePage(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            class="p-2 text-[var(--main-color)] cursor-pointer rounded disabled:cursor-not-allowed transition-all duration-300"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              ></path>
+            </svg>
+          </button>
+          <button
+            *ngFor="let page of visiblePages"
+            (click)="changePage(page)"
+            class="px-3 py-1 rounded-full transition-all duration-300 w-10 h-10 cursor-pointer"
+            [class.bg-[var(--main-color)]]="currentPage === page"
+            [class.text-white]="currentPage === page"
+          >
+            {{ page }}
+          </button>
+          <button
+            (click)="changePage(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            class="p-2 text-[var(--main-color)] cursor-pointer rounded disabled:cursor-not-allowed transition-all duration-300"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Order Details View -->
+    <div
+      *ngIf="view === 'details' && selectedOrder"
+      class="p-4 border rounded-lg bg-white shadow-sm animate-fade-in"
+    >
+      <!-- Error Message for Details View -->
+      <div
+        *ngIf="errorMessage"
+        class="p-4 bg-red-100 text-red-700 rounded-lg mb-4 animate-fade-in"
+      >
+        {{ errorMessage }}
+      </div>
+      <button
+        (click)="setView('list')"
+        class="mb-4 text-[var(--main-color)] hover:underline flex items-center cursor-pointer transition-colors duration-300 hover:text-[var(--main-color-dark)]"
+      >
+        <svg
+          class="w-4 h-4 mr-1"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        Back to Orders
+      </button>
+      <h1 class="text-3xl font-bold mb-4 text-gray-800 tracking-tight">
+        Order #{{ selectedOrder.id }}
+      </h1>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800">Customer Details</h3>
+          <p class="text-gray-700">Name: {{ selectedOrder.customerName }}</p>
+          <p class="text-gray-700">
+            Address: {{ selectedOrder.deliveryAddress }}
+          </p>
+          <p class="text-gray-700" *ngIf="selectedOrder.phone">
+            Phone: {{ selectedOrder.phone }}
+          </p>
+          <p class="text-gray-700" *ngIf="selectedOrder.orderDate">
+            Order Date: {{ selectedOrder.orderDate | date : "medium" }}
+          </p>
+          <p class="text-gray-700" *ngIf="selectedOrder.totalPrice">
+            Total Price: ${{ selectedOrder.totalPrice }}
+          </p>
+          <p class="text-gray-700">
+            Status:
+            <span
+              class="px-2 py-1 rounded text-sm font-medium"
+              [ngClass]="{
+                'bg-yellow-100 text-yellow-800':
+                  selectedOrder.status === 'pending',
+                'bg-orange-100 text-orange-800':
+                  selectedOrder.status === 'preparing',
+                'bg-blue-100 text-blue-800':
+                  selectedOrder.status === 'in-progress',
+                'bg-green-100 text-green-800':
+                  selectedOrder.status === 'recieved'
+              }"
+            >
+              {{
+                selectedOrder.status === "in-progress"
+                  ? "On Way"
+                  : selectedOrder.status === "recieved"
+                  ? "Received"
+                  : (selectedOrder.status | titlecase)
+              }}
+            </span>
+          </p>
+          <div
+            class="mt-2 flex items-center gap-2"
+            *ngIf="
+              originalStatus !== 'recieved' && originalStatus !== 'pending'
+            "
+          >
+            <label class="font-semibold text-gray-800">Update Status:</label>
+            <select
+              [(ngModel)]="selectedOrder.status"
+              class="p-1 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)]"
+            >
+              <option *ngIf="originalStatus === 'preparing'" value="preparing">
+                Preparing
+              </option>
+              <option
+                *ngIf="originalStatus === 'preparing'"
+                value="in-progress"
+              >
+                On Way
+              </option>
+              <option
+                *ngIf="originalStatus === 'in-progress'"
+                value="in-progress"
+              >
+                On Way
+              </option>
+              <option *ngIf="originalStatus === 'in-progress'" value="recieved">
+                Received
+              </option>
+            </select>
+            <button
+              (click)="saveOrderStatus()"
+              [disabled]="!isStatusChanged()"
+              class="px-3 py-1 bg-[var(--main-color)] text-white rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300"
+            >
+              Update
+            </button>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800">Order Items</h3>
+          <p
+            class="text-gray-700"
+            *ngIf="!selectedOrder.items || selectedOrder.items.length === 0"
+          >
+            No items available
+          </p>
+          <ul
+            class="list-disc pl-5 text-gray-700"
+            *ngIf="selectedOrder.items && selectedOrder.items.length > 0"
+          >
+            <li
+              *ngFor="let item of selectedOrder.items"
+              class="flex items-center gap-2"
+            >
+              <img
+                *ngIf="item.image"
+                [src]="item.image"
+                alt="{{ item.name }}"
+                class="w-12 h-12 object-cover rounded"
+              />
+              <div>
+                {{ item.name }} x {{ item.quantity }}
+                <span *ngIf="item.color"> (Color: {{ item.color }})</span>
+                <span *ngIf="item.size"> (Size: {{ item.size }})</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

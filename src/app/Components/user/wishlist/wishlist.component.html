@@ -1,0 +1,343 @@
+<div class="mx-auto px-2 md:py-2 lg:px-8 lg:py-0 my-10">
+  <!-- Wishlist Section -->
+  <div class="wishlist container mx-auto px-4 py-8">
+    <!-- Header with Title and Actions -->
+    <div
+      class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4"
+    >
+      <h2
+        class="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left"
+      >
+        My Wishlist
+        <span class="text-gray-500 font-medium text-base sm:text-lg">
+          ({{ wishlistItems().length }} items)
+        </span>
+      </h2>
+      <div class="flex gap-3 sm:gap-4">
+        <button
+          disabled
+          title="This feature is not available yet"
+          class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-100 text-red-600 rounded-md cursor-not-allowed opacity-50 text-sm sm:text-base flex items-center gap-2"
+        >
+          <i class="fas fa-heart-broken"></i> Remove All
+        </button>
+        <button
+          disabled
+          title="This feature is not available yet"
+          class="px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--main-color)] text-white rounded-md cursor-not-allowed opacity-50 text-sm sm:text-base flex items-center gap-2"
+        >
+          <i class="fas fa-cart-plus"></i> Add All to Cart
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading()" class="text-center py-10 animate-pulse">
+      <p class="text-lg sm:text-xl font-semibold text-gray-600">
+        Loading your wishlist...
+      </p>
+    </div>
+
+    <!-- Error State -->
+    <div
+      *ngIf="!loading() && errorMessage()"
+      class="text-center py-8 sm:py-10 bg-red-100 text-red-800 p-4 rounded-lg"
+    >
+      <p class="text-base sm:text-lg font-medium">{{ errorMessage() }}</p>
+      <button
+        (click)="loadWishlist()"
+        class="mt-3 sm:mt-4 px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--main-color)] text-white rounded-md cursor-pointer text-sm sm:text-base"
+      >
+        Retry
+      </button>
+    </div>
+
+    <!-- Wishlist Items -->
+    <div
+      *ngIf="!loading() && !errorMessage() && wishlistItems().length > 0"
+      class="flex flex-col gap-4"
+    >
+      <!-- Column Headers (Hidden on Mobile) -->
+      <div
+        class="hidden sm:grid sm:grid-cols-5 gap-2 sm:gap-4 mb-1 shadow-xl p-3 rounded-t-lg"
+      >
+        <span class="text-xl font-semibold text-gray-700 text-center"
+          >Image</span
+        >
+        <span class="text-xl font-semibold text-gray-700 text-center"
+          >Name</span
+        >
+        <span class="text-xl font-semibold text-gray-700 text-center"
+          >Status</span
+        >
+        <span class="text-xl font-semibold text-gray-700 text-center"
+          >Price</span
+        >
+        <span class="text-xl font-semibold text-gray-700 text-center"
+          >Action</span
+        >
+      </div>
+
+      <!-- Items -->
+      @for (item of wishlistItems(); track item.id) {
+      <div
+        class="bg-white rounded-lg sm:rounded-xl shadow-xl p-3 sm:p-4 border border-gray-200"
+      >
+        <!-- Mobile Layout -->
+        <div class="flex items-center gap-3 sm:hidden">
+          <!-- Product Image (Left) -->
+          <div class="flex-shrink-0">
+            <a [routerLink]="['/product', item.productId]">
+              <img
+                [src]="
+                  item.image.startsWith('//')
+                    ? 'https:' + item.image
+                    : item.image || 'https://fakeimg.pl/300/'
+                "
+                class="w-20 h-20 object-fill rounded-lg"
+                [alt]="item.title"
+                (error)="onImageError($event)"
+              />
+            </a>
+          </div>
+
+          <!-- Name, Status, Price (Stacked) -->
+          <div class="flex-1 flex flex-col gap-1">
+            <h5 class="text-base font-semibold text-gray-800 line-clamp-1">
+              {{ item.title }}
+            </h5>
+            <p
+              class="text-sm font-medium"
+              [ngClass]="{
+                'text-green-600': item.status === 'Active',
+                'text-yellow-600': item.status === 'Pending'
+              }"
+            >
+              {{ item.status === "Active" ? "Available" : "Under Review" }}
+            </p>
+            <div>
+              <span
+                class="text-base font-bold text-gray-900"
+                [ngClass]="{ 'line-through text-gray-400': item.discount > 0 }"
+              >
+                ${{ item.unitPrice.toFixed(2) }}
+              </span>
+              <span
+                *ngIf="item.discount > 0"
+                class="text-base font-bold text-green-600 ml-2"
+              >
+                ${{ item.sellPrice.toFixed(2) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Remove Button (Far Right) -->
+          <div class="flex-shrink-0">
+            <button
+              (click)="removeFromWishlist(item.productId)"
+              class="px-2 py-1 bg-red-100 text-red-600 rounded-md cursor-pointer"
+            >
+              <i class="fas fa-heart-broken text-sm"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Desktop/Tablet Layout -->
+        <div class="hidden sm:grid sm:grid-cols-5 gap-2 sm:gap-4 items-center">
+          <!-- Product Image -->
+          <div class="flex justify-center">
+            <a
+              [routerLink]="['/product', item.productId]"
+              class="flex-shrink-0"
+            >
+              <img
+                [src]="
+                  item.image.startsWith('//')
+                    ? 'https:' + item.image
+                    : item.image || 'https://fakeimg.pl/300/'
+                "
+                class="w-32 h-32 object-fill rounded-lg mx-auto"
+                [alt]="item.title"
+                (error)="onImageError($event)"
+              />
+            </a>
+          </div>
+
+          <!-- Product Name -->
+          <div class="text-center">
+            <h5 class="text-xl font-semibold text-gray-800 line-clamp-1">
+              {{ item.title }}
+            </h5>
+          </div>
+
+          <!-- Status -->
+          <div class="text-center">
+            <p
+              class="text-xl font-medium"
+              [ngClass]="{
+                'text-green-600': item.status === 'Active',
+                'text-yellow-600': item.status === 'Pending'
+              }"
+            >
+              {{ item.status === "Active" ? "Available" : "Under Review" }}
+            </p>
+          </div>
+
+          <!-- Price -->
+          <div class="text-center">
+            <span
+              class="text-xl font-bold text-gray-900"
+              [ngClass]="{ 'line-through text-gray-400': item.discount > 0 }"
+            >
+              ${{ item.unitPrice.toFixed(2) }}
+            </span>
+            <span
+              *ngIf="item.discount > 0"
+              class="text-xl font-bold text-green-600 ml-2"
+            >
+              ${{ item.sellPrice.toFixed(2) }}
+            </span>
+          </div>
+
+          <!-- Remove Button -->
+          <div class="flex justify-center">
+            <button
+              (click)="removeFromWishlist(item.productId)"
+              class="px-3 py-2 bg-red-100 text-red-600 rounded-md cursor-pointer"
+            >
+              <i class="fas fa-heart-broken text-xl"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Empty Wishlist -->
+    <div
+      *ngIf="!loading() && !errorMessage() && wishlistItems().length === 0"
+      class="text-center py-12 sm:py-20"
+    >
+      <i
+        class="fas fa-heart-broken text-4xl sm:text-5xl text-gray-400 mb-4"
+      ></i>
+      <p class="text-lg sm:text-xl font-semibold text-gray-600">
+        Your wishlist is empty!
+      </p>
+      <p class="text-gray-500 mt-2 text-sm sm:text-base">
+        Add some products to get started.
+      </p>
+      <button
+        [routerLink]="'/shop'"
+        class="mt-3 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2 bg-[var(--main-color)] text-white rounded-md cursor-pointer text-sm sm:text-base"
+      >
+        Explore Products
+      </button>
+    </div>
+
+    <!-- Related Products Section -->
+    <div class="related-products container mx-auto py-8">
+      <h2
+        class="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left mb-6"
+      >
+        You May Also Like <span class="text-sm italic">(Recommendation)</span>
+      </h2>
+
+      <!-- Loading State -->
+      <div
+        *ngIf="recommendationsLoading()"
+        class="text-center py-10 animate-pulse"
+      >
+        <p class="text-lg sm:text-xl font-semibold text-gray-600">
+          Loading recommendations...
+        </p>
+      </div>
+
+      <!-- Empty Recommendations -->
+      <div
+        *ngIf="!recommendationsLoading() && recommendedProducts().length === 0"
+        class="text-center py-12 sm:py-20"
+      >
+        <i class="fas fa-box-open text-4xl sm:text-5xl text-gray-400 mb-4"></i>
+        <p class="text-lg sm:text-xl font-semibold text-gray-600">
+          No recommendations available
+        </p>
+        <p class="text-gray-500 mt-2 text-sm sm:text-base">
+          Explore more products to get personalized recommendations.
+        </p>
+        <button
+          [routerLink]="'/shop'"
+          class="mt-3 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2 bg-[var(--main-color)] text-white rounded-md cursor-pointer text-sm sm:text-base"
+        >
+          Explore Products
+        </button>
+      </div>
+
+      <!-- Recommended Products -->
+      <div
+        *ngIf="!recommendationsLoading() && recommendedProducts().length > 0"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+      >
+        @for (product of recommendedProducts(); track product.id) {
+        <div
+          class="bg-white rounded-lg sm:rounded-xl shadow-xl p-3 sm:p-4 border border-gray-200"
+        >
+          <!-- Product Image -->
+          <a [routerLink]="['/product', product.id]">
+            <img
+              [src]="
+                product.imageUrls[0] && product.imageUrls[0].startsWith('//')
+                  ? 'https:' + product.imageUrls[0]
+                  : product.imageUrls[0] ||
+                    'https://fakeimg.deblan.org/600x400/000/fff'
+              "
+              class="w-full h-40 sm:h-48 object-contain rounded-lg mb-3"
+              [alt]="product.title"
+              (error)="onImageError($event)"
+            />
+          </a>
+
+          <!-- Product Details -->
+          <div class="flex flex-col gap-2">
+            <!-- Product Name -->
+            <h5
+              class="text-base sm:text-lg font-semibold text-gray-800 line-clamp-2"
+            >
+              {{ product.title }}
+            </h5>
+
+            <!-- Status -->
+            <p
+              class="text-sm sm:text-base font-medium"
+              [ngClass]="{
+                'text-green-600': product.status === 'Active',
+                'text-yellow-600': product.status === 'Pending'
+              }"
+            >
+              {{ product.status === "Active" ? "Available" : "Under Review" }}
+            </p>
+
+            <!-- Price -->
+            <div>
+              <span
+                class="text-base sm:text-lg font-bold text-gray-900"
+                [ngClass]="{
+                  'line-through text-gray-400': product.discount > 0
+                }"
+              >
+                ${{ product.unitPrice.toFixed(2) }}
+              </span>
+              <span
+                *ngIf="product.discount > 0"
+                class="text-base sm:text-lg font-bold text-green-600 ml-2"
+              >
+                ${{ product.sellPrice.toFixed(2) }}
+              </span>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

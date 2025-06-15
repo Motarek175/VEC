@@ -1,0 +1,139 @@
+<div
+  class="mx-auto px-4 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-[#703232]/10 via-[#a14b4b]/10 to-[#703232]/10 animate-gradient"
+>
+  <div class="flex justify-center gap-14 mitems-center max-w-7xl h-[450px]">
+    <!-- Image Container -->
+    <div class="img hidden md:block relative">
+      <img
+        src="./assets/image.png"
+        alt="Login Illustration"
+        loading="eager"
+        class="h-full object-cover rounded-2xl shadow-2xl transform transition-transform duration-300"
+      />
+    </div>
+    <!-- Form Container -->
+    <div
+      class="flex flex-col justify-center bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl sm:max-w-md w-full form-container border border-white/20"
+    >
+      <div class="sm:mx-auto sm:w-full">
+        <h2
+          class="text-4xl font-extrabold text-gray-900 text-center bg-clip-text text-transparent bg-gradient-to-r from-[#703232] to-[#a14b4b]"
+        >
+          Log in to Exclusive
+        </h2>
+        <p class="mt-2 text-base text-gray-700 text-center">
+          Enter your details below
+        </p>
+      </div>
+      <div class="mt-6 sm:mx-auto sm:w-full">
+        <form
+          class="flex flex-col gap-6"
+          [formGroup]="loginForm"
+          (ngSubmit)="login()"
+        >
+          <!-- Email Field -->
+          <div>
+            <input
+              type="email"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  loginForm.get('email')?.valid &&
+                  loginForm.get('email')?.touched,
+                'border-2 border-red-500':
+                  loginForm.get('email')?.invalid &&
+                  loginForm.get('email')?.touched,
+                'border-2 border-gray-200': !loginForm.get('email')?.touched
+              }"
+              placeholder="Email Address"
+              formControlName="email"
+            />
+            <div
+              class="mt-2 text-sm"
+              *ngIf="
+                loginForm.get('email')?.invalid &&
+                loginForm.get('email')?.touched
+              "
+            >
+              <p class="text-red-500" *ngIf="!loginForm.get('email')?.value">
+                <span class="inline-block w-4">✘</span>
+                Email is required
+              </p>
+              <p
+                class="text-red-500"
+                *ngIf="
+                  loginForm.get('email')?.hasError('email') &&
+                  loginForm.get('email')?.value
+                "
+              >
+                <span class="inline-block w-4">✘</span>
+                Enter a valid email
+              </p>
+            </div>
+          </div>
+          <!-- Password Field -->
+          <div>
+            <input
+              type="password"
+              autocomplete="current-password"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  loginForm.get('password')?.valid &&
+                  loginForm.get('password')?.touched,
+                'border-2 border-red-500':
+                  loginForm.get('password')?.invalid &&
+                  loginForm.get('password')?.touched,
+                'border-2 border-gray-200': !loginForm.get('password')?.touched
+              }"
+              placeholder="Password"
+              formControlName="password"
+            />
+            <div
+              class="mt-2 text-sm"
+              *ngIf="
+                loginForm.get('password')?.invalid &&
+                loginForm.get('password')?.touched
+              "
+            >
+              <p class="text-red-500" *ngIf="!loginForm.get('password')?.value">
+                <span class="inline-block w-4">✘</span>
+                Password is required
+              </p>
+            </div>
+          </div>
+          <!-- Forgot Password Link -->
+          <div class="text-md">
+            <a
+              routerLink="/forget-email"
+              class="font-medium text-[#703232] hover:text-[#5b2929] transition-colors duration-200 block text-right"
+            >
+              Forgot your password?
+            </a>
+          </div>
+          <!-- Submit Button -->
+          <div class="flex justify-end">
+            <button
+              class="w-full flex cursor-pointer justify-center py-4 px-8 border border-transparent text-xl font-bold rounded-xl text-white bg-gradient-to-r from-[#703232] to-[#a14b4b] disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="!loginForm.valid"
+            >
+              Login
+            </button>
+          </div>
+          <!-- Sign Up Link -->
+          <div class="text-center">
+            <p class="text-gray-700">
+              Don't have an account?
+              <a
+                routerLink="/signup"
+                class="text-[#703232] font-bold hover:text-[#5b2929] underline transition-colors duration-200"
+              >
+                Sign up
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

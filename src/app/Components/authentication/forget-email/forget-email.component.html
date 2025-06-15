@@ -1,0 +1,85 @@
+<main
+  class="w-full flex items-center justify-center p-6 bg-gradient-to-br from-[#703232]/10 via-[#a14b4b]/10 to-[#703232]/10 animate-gradient"
+>
+  <div
+    class="mt-7 bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-4 sm:p-7"
+  >
+    <div class="text-center relative">
+      <h1
+        class="block text-4xl font-extrabold text-gray-900 bg-clip-text text-transparent bg-gradient-to-r from-[#703232] to-[#a14b4b]"
+      >
+        Forgot Password?
+      </h1>
+      <p class="mt-2 text-base text-gray-700">
+        Remember your password?
+        <a
+          class="text-[#703232] font-bold hover:text-[#5b2929] underline transition-colors duration-200"
+          routerLink="/login"
+        >
+          Login here
+        </a>
+      </p>
+    </div>
+    <div class="mt-6">
+      <form [formGroup]="form" (ngSubmit)="reset()">
+        <div class="grid gap-y-6">
+          <div>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]': form.get('email')?.valid,
+                'border-2 border-red-500': form.get('email')?.invalid,
+                'border-2 border-gray-200': !form.get('email')?.touched
+              }"
+              placeholder="Enter email"
+              formControlName="email"
+              aria-describedby="email-error"
+            />
+            <div class="mt-2 text-sm" id="email-error">
+              <p
+                [ngClass]="{
+                  'text-[#a14b4b]': form.get('email')?.value,
+                  'text-red-500': !form.get('email')?.value
+                }"
+              >
+                <span class="inline-block w-4">{{
+                  form.get("email")?.value ? "✔" : "✘"
+                }}</span>
+                Email is required
+              </p>
+              <p
+                [ngClass]="{
+                  'text-[#a14b4b]':
+                    !form.get('email')?.hasError('email') &&
+                    form.get('email')?.value,
+                  'text-red-500':
+                    form.get('email')?.hasError('email') &&
+                    form.get('email')?.value
+                }"
+                *ngIf="form.get('email')?.value"
+              >
+                <span class="inline-block w-4">{{
+                  !form.get("email")?.hasError("email") &&
+                  form.get("email")?.value
+                    ? "✔"
+                    : "✘"
+                }}</span>
+                Enter a valid email
+              </p>
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="w-full flex justify-center py-4 px-8 border border-transparent text-xl font-bold rounded-xl text-white bg-gradient-to-r from-[#703232] to-[#a14b4b] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="!form.valid"
+          >
+            Reset Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>

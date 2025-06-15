@@ -1,1 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+* {
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+:root {
+  --main-color: #703232;
+  --secondary-color: #db4444;
+}
+
+a {
+  outline: none;
+}

@@ -1,0 +1,426 @@
+<div
+  class="mx-auto px-4 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-[#703232]/10 via-[#a14b4b]/10 to-[#703232]/10 min-h-screen animate-gradient"
+>
+  <div class="md:flex md:justify-center gap-8 max-w-7xl mx-auto">
+    <div
+      class="flex flex-col justify-center bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl sm:max-w-3xl w-full form-container border border-white/20"
+    >
+      <div class="sm:mx-auto sm:w-full">
+        <h2
+          class="text-4xl font-extrabold text-gray-900 text-center bg-clip-text text-transparent bg-gradient-to-r from-[#703232] to-[#a14b4b]"
+        >
+          Create Your Account
+        </h2>
+        <p class="mt-2 text-base text-gray-700 text-center">
+          Fill in your details to get started
+        </p>
+      </div>
+      <div class="mt-6">
+        <form
+          class="grid grid-cols-1 sm:grid-cols-3 gap-6"
+          [formGroup]="registerForm"
+          (ngSubmit)="register()"
+        >
+          <!-- Row 1: userName, email, password -->
+          <div>
+            <input
+              type="text"
+              id="userName"
+              autocomplete="username"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  registerForm.get('userName')?.valid &&
+                  registerForm.get('userName')?.touched,
+                'border-2 border-red-500':
+                  registerForm.get('userName')?.invalid &&
+                  registerForm.get('userName')?.touched,
+                'border-2 border-gray-200':
+                  !registerForm.get('userName')?.touched
+              }"
+              placeholder="Username"
+              formControlName="userName"
+              (keyup)="updateValidations()"
+            />
+            <div class="mt-2 text-sm">
+              <p
+                *ngIf="
+                  registerForm.get('userName')?.touched &&
+                  !registerForm.get('userName')?.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Username is required
+              </p>
+              <p
+                *ngIf="
+                  registerForm.get('userName')?.touched &&
+                  registerForm.get('userName')?.value &&
+                  registerForm.get('userName')?.hasError('pattern')
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Username must contain only letters and numbers, no spaces or
+                special characters
+              </p>
+            </div>
+          </div>
+          <div>
+            <input
+              type="email"
+              autocomplete="email"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  registerForm.get('email')?.valid &&
+                  registerForm.get('email')?.touched,
+                'border-2 border-red-500':
+                  registerForm.get('email')?.invalid &&
+                  registerForm.get('email')?.touched,
+                'border-2 border-gray-200': !registerForm.get('email')?.touched
+              }"
+              placeholder="Email Address"
+              formControlName="email"
+              (keyup)="updateValidations()"
+            />
+            <div class="mt-2 text-sm">
+              <p
+                *ngIf="
+                  registerForm.get('email')?.touched &&
+                  !registerForm.get('email')?.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Email is required
+              </p>
+              <p
+                *ngIf="
+                  registerForm.get('email')?.touched &&
+                  registerForm.get('email')?.value &&
+                  registerForm.get('email')?.hasError('email')
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Enter a valid email
+              </p>
+            </div>
+          </div>
+          <div>
+            <input
+              type="password"
+              autocomplete="new-password"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  registerForm.get('password')?.valid &&
+                  registerForm.get('password')?.touched,
+                'border-2 border-red-500':
+                  registerForm.get('password')?.invalid &&
+                  registerForm.get('password')?.touched,
+                'border-2 border-gray-200':
+                  !registerForm.get('password')?.touched
+              }"
+              placeholder="Password"
+              formControlName="password"
+              (keyup)="checkMatch(); updateValidations()"
+            />
+            <div class="mt-2 text-sm">
+              <p
+                *ngIf="
+                  registerForm.get('password')?.touched &&
+                  !registerForm.get('password')?.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Password is required
+              </p>
+              <p
+                *ngIf="
+                  registerForm.get('password')?.touched &&
+                  registerForm.get('password')?.value &&
+                  registerForm.get('password')?.hasError('pattern')
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                At least 8 characters, one uppercase, one lowercase, one number,
+                and one special character (ex: Mo12367#)
+              </p>
+            </div>
+          </div>
+          <!-- Row 2: rePassword, phone, state -->
+          <div>
+            <input
+              type="password"
+              autocomplete="new-password"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  registerForm.get('rePassword')?.valid &&
+                  isMatch.value &&
+                  registerForm.get('rePassword')?.touched,
+                'border-2 border-red-500':
+                  (registerForm.get('rePassword')?.invalid || !isMatch.value) &&
+                  registerForm.get('rePassword')?.touched,
+                'border-2 border-gray-200':
+                  !registerForm.get('rePassword')?.touched
+              }"
+              placeholder="Confirm Password"
+              formControlName="rePassword"
+              (keyup)="checkMatch(); updateValidations()"
+            />
+            <div class="mt-2 text-sm">
+              <p
+                *ngIf="
+                  registerForm.get('rePassword')?.touched &&
+                  !registerForm.get('rePassword')?.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Confirm Password is required
+              </p>
+              <p
+                *ngIf="
+                  registerForm.get('rePassword')?.touched &&
+                  registerForm.get('rePassword')?.value &&
+                  !isMatch.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Passwords must match
+              </p>
+            </div>
+          </div>
+          <div>
+            <input
+              type="text"
+              autocomplete="tel"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  registerForm.get('phone')?.valid &&
+                  registerForm.get('phone')?.touched,
+                'border-2 border-red-500':
+                  registerForm.get('phone')?.invalid &&
+                  registerForm.get('phone')?.touched,
+                'border-2 border-gray-200': !registerForm.get('phone')?.touched
+              }"
+              placeholder="Phone Number"
+              formControlName="phone"
+              (keyup)="updateValidations()"
+            />
+            <div class="mt-2 text-sm">
+              <p
+                *ngIf="
+                  registerForm.get('phone')?.touched &&
+                  !registerForm.get('phone')?.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Phone number is required
+              </p>
+              <p
+                *ngIf="
+                  registerForm.get('phone')?.touched &&
+                  registerForm.get('phone')?.value &&
+                  registerForm.get('phone')?.hasError('pattern')
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Enter a valid number starting with 010, 011, 012, or 015
+              </p>
+            </div>
+          </div>
+          <div>
+            <input
+              type="text"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  registerForm.get('state')?.valid &&
+                  registerForm.get('state')?.touched,
+                'border-2 border-red-500':
+                  registerForm.get('state')?.invalid &&
+                  registerForm.get('state')?.touched,
+                'border-2 border-gray-200': !registerForm.get('state')?.touched
+              }"
+              placeholder="State"
+              formControlName="state"
+              (keyup)="updateValidations()"
+            />
+            <div class="mt-2 text-sm">
+              <p
+                *ngIf="
+                  registerForm.get('state')?.touched &&
+                  !registerForm.get('state')?.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                State is required
+              </p>
+            </div>
+          </div>
+          <!-- Row 3: governorate, location, gender -->
+          <div>
+            <input
+              type="text"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  registerForm.get('governorate')?.valid &&
+                  registerForm.get('governorate')?.touched,
+                'border-2 border-red-500':
+                  registerForm.get('governorate')?.invalid &&
+                  registerForm.get('governorate')?.touched,
+                'border-2 border-gray-200':
+                  !registerForm.get('governorate')?.touched
+              }"
+              placeholder="Governorate"
+              formControlName="governorate"
+              (keyup)="updateValidations()"
+            />
+            <div class="mt-2 text-sm">
+              <p
+                *ngIf="
+                  registerForm.get('governorate')?.touched &&
+                  !registerForm.get('governorate')?.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Governorate is required
+              </p>
+            </div>
+          </div>
+          <div>
+            <input
+              type="text"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  registerForm.get('location')?.valid &&
+                  registerForm.get('location')?.touched,
+                'border-2 border-red-500':
+                  registerForm.get('location')?.invalid &&
+                  registerForm.get('location')?.touched,
+                'border-2 border-gray-200':
+                  !registerForm.get('location')?.touched
+              }"
+              placeholder="Location"
+              formControlName="location"
+              (keyup)="updateValidations()"
+            />
+            <div class="mt-2 text-sm">
+              <p
+                *ngIf="
+                  registerForm.get('location')?.touched &&
+                  !registerForm.get('location')?.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Location is required
+              </p>
+            </div>
+          </div>
+          <div>
+            <select
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  registerForm.get('gender')?.valid &&
+                  registerForm.get('gender')?.touched,
+                'border-2 border-red-500':
+                  registerForm.get('gender')?.invalid &&
+                  registerForm.get('gender')?.touched,
+                'border-2 border-gray-200': !registerForm.get('gender')?.touched
+              }"
+              formControlName="gender"
+              (change)="updateValidations()"
+            >
+              <option value="" disabled selected>Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+            <div class="mt-2 text-sm">
+              <p
+                *ngIf="
+                  registerForm.get('gender')?.touched &&
+                  !registerForm.get('gender')?.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Gender is required
+              </p>
+            </div>
+          </div>
+          <!-- Row 4: birthDate, nationalId -->
+          <div>
+            <input
+              type="date"
+              class="appearance-none block w-full px-4 py-3 bg-white/50 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#a14b4b]/50 transition-all duration-300 shadow-md"
+              [ngClass]="{
+                'border-2 border-[#a14b4b]':
+                  registerForm.get('birthDate')?.valid &&
+                  registerForm.get('birthDate')?.touched,
+                'border-2 border-red-500':
+                  registerForm.get('birthDate')?.invalid &&
+                  registerForm.get('birthDate')?.touched,
+                'border-2 border-gray-200':
+                  !registerForm.get('birthDate')?.touched
+              }"
+              placeholder="Birth Date"
+              formControlName="birthDate"
+              (change)="updateValidations()"
+            />
+            <div class="mt-2 text-sm">
+              <p
+                *ngIf="
+                  registerForm.get('birthDate')?.touched &&
+                  !registerForm.get('birthDate')?.value
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                Birth Date is required
+              </p>
+            </div>
+          </div>
+          <!-- Empty div to maintain grid alignment -->
+          <div></div>
+          <!-- Submit Button -->
+          <div class="col-span-1 sm:col-span-3 mt-8">
+            <button
+              class="w-full flex justify-center py-4 px-8 border border-transparent text-xl cursor-pointer font-bold rounded-xl text-white bg-gradient-to-r from-[#703232] to-[#a14b4b] disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="!registerForm.valid || !isMatch.value"
+            >
+              Create Account
+            </button>
+          </div>
+          <!-- Sign In Link -->
+          <div class="col-span-1 sm:col-span-3 text-center mt-4">
+            <p class="text-gray-700">
+              Have an account?
+              <a
+                routerLink="/login"
+                class="text-[#703232] font-bold hover:text-[#5b2929] underline transition-colors duration-200"
+                >Sign In</a
+              >
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

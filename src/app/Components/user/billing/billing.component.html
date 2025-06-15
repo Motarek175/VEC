@@ -1,0 +1,258 @@
+<div class="grid sm:px-10 lg:grid-cols-2 lg:px-20 xl:px-32 my-10">
+  <!-- Payment Details -->
+  <div class="mt-10 bg-gray-50 px-4 pt-8 lg:mt-0">
+    <p class="text-xl font-medium">Payment Details</p>
+    <p class="text-gray-400">
+      Complete your order by providing your payment details.
+    </p>
+    <!-- Shipping Methods -->
+    <p class="mt-8 text-lg font-medium">Shipping Methods</p>
+    <form
+      [formGroup]="billingForm"
+      (ngSubmit)="onSubmit()"
+      class="mt-5 grid grid-cols-2 gap-6"
+    >
+      <div class="relative">
+        <input
+          class="peer hidden"
+          id="radio_1"
+          type="radio"
+          name="radio"
+          [disabled]="true"
+          (change)="selectPayment('bank')"
+          [checked]="bank | async"
+        />
+        <span
+          class="peer-checked:border-gray-700 absolute right-4 top-1/2 box-content block h-3 w-3 -translate-y-1/2 rounded-full border-8 border-gray-300 bg-white"
+        ></span>
+        <label
+          class="peer-checked:border-2 peer-checked:border-gray-700 peer-checked:bg-gray-50 flex cursor-not-allowed select-none rounded-lg border border-gray-300 p-4 bg-gray-100 text-gray-500 hover:bg-gray-200"
+          for="radio_1"
+          (mouseover)="showBankTooltip = true"
+          (mouseout)="showBankTooltip = false"
+        >
+          <div>
+            <span class="mt-2 font-semibold">Bank</span>
+          </div>
+          <div
+            *ngIf="showBankTooltip"
+            class="absolute left-0 -top-14 mt-2 w-48 p-2 bg-[var(--main-color)] text-white text-sm rounded-md shadow-lg z-10"
+          >
+            This feature is currently unavailable.
+          </div>
+        </label>
+      </div>
+      <div class="relative">
+        <input
+          class="peer hidden"
+          id="radio_2"
+          type="radio"
+          name="radio"
+          (change)="selectPayment('cash')"
+          [checked]="cash | async"
+        />
+        <span
+          class="peer-checked:border-[var(--main-color)] absolute right-4 top-1/2 box-content block h-3 w-3 -translate-y-1/2 rounded-full border-8 border-[var(--main-color)]"
+        ></span>
+        <label
+          class="peer-checked:border-2 peer-checked:border-[var(--main-color)] peer-checked:bg-gray-50 flex cursor-pointer select-none rounded-lg border border-[var(--main-color)] p-4"
+          for="radio_2"
+        >
+          <div>
+            <span class="mt-2 font-semibold">Cash on Delivery</span>
+          </div>
+        </label>
+      </div>
+    </form>
+
+    <!-- Details -->
+    <div *ngIf="cash.value">
+      <form [formGroup]="billingForm" (ngSubmit)="onSubmit()" class="mt-5">
+        <div *ngIf="checkoutData.items && checkoutData.items.length > 0">
+          <!-- Name -->
+          <label for="name" class="mt-4 mb-2 block text-sm font-medium"
+            >Name</label
+          >
+          <div class="relative">
+            <input
+              type="text"
+              id="name"
+              formControlName="name"
+              class="w-full rounded-md border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:z-10 focus:border-[var(--main-color)] focus:ring-[var(--main-color)]"
+              [class.border-red-500]="
+                billingForm.get('name')?.touched &&
+                billingForm.get('name')?.invalid
+              "
+            />
+            <div
+              *ngIf="
+                billingForm.get('name')?.touched &&
+                billingForm.get('name')?.invalid
+              "
+              class="text-red-500 text-sm mt-1"
+            >
+              Name is required.
+            </div>
+          </div>
+
+          <!-- Email -->
+          <label for="email" class="mt-4 mb-2 block text-sm font-medium"
+            >Email</label
+          >
+          <div class="relative">
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              class="w-full rounded-md border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:z-10 focus:border-[var(--main-color)] focus:ring-[var(--main-color)]"
+              [class.border-red-500]="
+                billingForm.get('email')?.touched &&
+                billingForm.get('email')?.invalid
+              "
+            />
+            <div
+              *ngIf="
+                billingForm.get('email')?.touched &&
+                billingForm.get('email')?.invalid
+              "
+              class="text-red-500 text-sm mt-1"
+            >
+              Valid email is required.
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <label for="phone" class="mt-4 mb-2 block text-sm font-medium"
+            >Phone Number</label
+          >
+          <div class="relative">
+            <input
+              type="text"
+              id="phone"
+              formControlName="phone"
+              class="w-full rounded-md border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:z-10 focus:border-[var(--main-color)] focus:ring-[var(--main-color)]"
+              [class.border-red-500]="
+                billingForm.get('phone')?.touched &&
+                billingForm.get('phone')?.invalid
+              "
+            />
+            <div
+              *ngIf="
+                billingForm.get('phone')?.touched &&
+                billingForm.get('phone')?.invalid
+              "
+              class="text-red-500 text-sm mt-1"
+            >
+              Phone must be 11 digits.
+            </div>
+          </div>
+
+          <!-- Address 1 -->
+          <label for="address1" class="mt-4 mb-2 block text-sm font-medium"
+            >Address 1</label
+          >
+          <div class="relative">
+            <input
+              type="text"
+              id="address1"
+              formControlName="address1"
+              class="w-full rounded-md border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:z-10 focus:border-[var(--main-color)] focus:ring-[var(--main-color)]"
+              [class.border-red-500]="
+                billingForm.get('address1')?.touched &&
+                billingForm.get('address1')?.invalid
+              "
+            />
+            <div
+              *ngIf="
+                billingForm.get('address1')?.touched &&
+                billingForm.get('address1')?.invalid
+              "
+              class="text-red-500 text-sm mt-1"
+            >
+              Address is required.
+            </div>
+          </div>
+
+          <!-- Address 2 (Optional) -->
+          <label for="address2" class="mt-4 mb-2 block text-sm font-medium"
+            >Address 2 (Optional)</label
+          >
+          <div class="relative">
+            <input
+              type="text"
+              id="address2"
+              formControlName="address2"
+              class="w-full rounded-md border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:z-10 focus:border-[var(--main-color)] focus:ring-[var(--main-color)]"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div *ngIf="bank.value" class="hidden"></div>
+    <!-- btn place -->
+    <button
+      type="submit"
+      [disabled]="billingForm.invalid"
+      class="mt-4 mb-8 w-full cursor-pointer rounded-md bg-[var(--main-color)] px-6 py-3 font-medium text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+      (click)="onSubmit()"
+    >
+      Place Order
+    </button>
+  </div>
+  <!-- Order Summary -->
+  <div class="px-4 pt-8">
+    <p class="text-xl font-medium">Order Summary</p>
+    <p class="text-gray-400">Check your items and confirm your order.</p>
+    <div class="mt-8 rounded-lg border bg-white px-2 py-4 sm:px-6">
+      <div *ngIf="checkoutData.items && checkoutData.items.length > 0">
+        <div
+          *ngFor="let item of checkoutData.items"
+          class="flex flex-col rounded-lg bg-white sm:flex-row mb-4"
+        >
+          <img
+            class="m-2 h-24 w-28 rounded-md border object-cover object-center"
+            [src]="item.image"
+            alt="{{ item.name }}"
+            (error)="onImageError($event)"
+          />
+          <div class="flex w-full flex-col px-4 py-4">
+            <span class="font-semibold">{{ item.name }}</span>
+            <span class="float-right text-gray-400"
+              >Color: {{ item.color }}, Size: {{ item.size }}</span
+            >
+            <p class="text-lg font-bold">
+              ${{ item.price }} x {{ item.quantity }}
+            </p>
+          </div>
+        </div>
+        <!-- Total -->
+        <div class="mt-6 border-t border-b py-2">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-gray-900">Subtotal</p>
+            <p class="font-semibold text-gray-900">
+              ${{ checkoutData.summary.subtotal }}
+            </p>
+          </div>
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-gray-900">Shipping</p>
+            <p class="font-semibold text-gray-900">
+              ${{ checkoutData.summary.shippingCost }}
+            </p>
+          </div>
+        </div>
+        <div class="mt-6 flex items-center justify-between">
+          <p class="text-sm font-medium text-gray-900">Total</p>
+          <p class="text-2xl font-semibold text-gray-900">
+            ${{ checkoutData.summary.total }}
+          </p>
+        </div>
+      </div>
+      <div
+        *ngIf="!checkoutData.items || checkoutData.items.length === 0"
+        class="text-center text-gray-500"
+      >
+        No items in your order.
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,236 @@
+<nav class="w-full bg-white border-b border-gray-200 z-50">
+  <div class="mx-auto px-2 md:py-2 lg:px-8 lg:py-0">
+    <div class="flex justify-between items-center h-16 flex-wrap gap-5">
+      <!-- Brand -->
+      <p
+        class="text-4xl w-fit cursor-default font-bold text-[var(--main-color)] outline-0"
+      >
+        Style<span class="text-[#BA8C8C]">Hub</span>
+      </p>
+      <!-- Mobile menu button -->
+      <div class="flex items-center justify-center gap-3">
+        <button
+          (click)="toggleUserMenu()"
+          class="md:hidden text-center cursor-pointer"
+          [ngClass]="{ 'text-white': isUserMenuOpen }"
+        >
+          <img
+            [src]="_UserAuthService.profilePicture | async"
+            alt="Profile"
+            class="w-10 h-10 object-cover rounded-full border-4 border-[#a14b4b]/30 shadow-md transition-transform duration-300 hover:scale-105"
+          />
+        </button>
+
+        <button
+          (click)="toggleMenu()"
+          class="md:hidden cursor-pointer inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 focus:outline-none"
+          [attr.aria-expanded]="isMenuOpen"
+        >
+          <span class="sr-only">Menu</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-10 w-10"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+        <div
+          id="user-menu-mobile"
+          class="md:hidden px-5 py-3 rounded-lg text-white absolute z-50 top-16 right-20 bg-gradient-to-r from-[#737373] via-[#a5a5a5] to-[#d9d9d9]"
+          [class.hidden]="!isUserMenuOpen"
+        >
+          <ul>
+            <li
+              class="flex items-center gap-5 mb-2 px-3 py-2 cursor-pointer hover:text-white"
+              *ngIf="!this._UserAuthService.isUserLogin.getValue()"
+              routerLink="/login"
+            >
+              <i class="fa-solid fa-arrow-right-to-bracket text-2xl"></i>
+              <a routerLink="/login" class="text-xl">Login</a>
+            </li>
+            <li
+              class="flex items-center gap-5 mb-2 px-3 py-2 cursor-pointer hover:text-white"
+              *ngIf="this._UserAuthService.isUserLogin.getValue()"
+            >
+              <i class="fa-solid fa-user text-2xl"></i>
+              <a routerLink="/profile" class="text-xl">Profile</a>
+            </li>
+            <li
+              class="flex items-center gap-5 mb-2 px-3 py-2 cursor-pointer hover:text-white"
+              *ngIf="this._UserAuthService.isUserLogin.getValue()"
+            >
+              <i class="fa-solid fa-sack-dollar text-2xl"></i>
+              <a routerLink="/orders" class="text-xl">Orders</a>
+            </li>
+            <li
+              class="flex items-center gap-5 px-3 py-2 hover:text-white cursor-pointer"
+              *ngIf="this._UserAuthService.isUserLogin.getValue()"
+              (click)="this._UserAuthService.logout()"
+            >
+              <i class="fa-solid fa-arrow-right-from-bracket text-2xl"></i>
+              <a class="text-xl cursor-pointer">Logout</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- Navigation Links -->
+      <div class="hidden md:flex md:flex-1 md:justify-center md:items-center">
+        <a
+          class="cursor-pointer relative text-2xl transition-all font-medium py-1 px-4"
+          routerLink="/home"
+          routerLinkActive="border-b-2 text-[var(--main-color)] rounded-[12px] border-t-2 border-[var(--main-color)]"
+          >Home</a
+        >
+        <a
+          class="cursor-pointer relative text-2xl transition-all font-medium py-1 px-4"
+          routerLink="/shop"
+          routerLinkActive="border-b-2 text-[var(--main-color)] rounded-[12px] border-t-2 border-[var(--main-color)]"
+          >Shop</a
+        >
+        <a
+          class="cursor-pointer relative text-2xl transition-all font-medium py-1 px-4"
+          routerLink="/about"
+          routerLinkActive="border-b-2 text-[var(--main-color)] rounded-[12px] border-t-2 border-[var(--main-color)]"
+          >About</a
+        >
+        <a
+          class="cursor-pointer relative text-2xl transition-all font-medium py-1 px-4"
+          routerLink="/contact"
+          routerLinkActive="border-b-2 text-[var(--main-color)] rounded-[12px] border-t-2 border-[var(--main-color)]"
+          >Contact</a
+        >
+        <a
+          class="cursor-pointer relative text-2xl transition-all font-medium py-1 px-4"
+          routerLink="/merchantReg"
+          *ngIf="!_UserAuthService.isUserLogin.getValue()"
+          >Sell</a
+        >
+      </div>
+      <!-- SignIn & Icons -->
+      <div class="hidden md:flex gap-2 justify-center items-center">
+        <button
+          class="relative text-gray-700 hover:text-gray-900"
+          routerLink="/wishlist"
+        >
+          <i class="fa-regular fa-heart text-3xl transition cursor-pointer"></i>
+          <span
+            class="absolute rounded-full flex grow place-content-center place-items-center w-[20px] h-[20px] bg-red-600 text-white text-center text-sm -right-2 -top-2"
+            >{{ wishlistCount() }}</span
+          >
+        </button>
+        <button
+          class="relative text-gray-700 hover:text-gray-900 mx-3"
+          routerLink="/cart"
+        >
+          <i
+            class="fa-solid fa-cart-shopping text-3xl transition cursor-pointer"
+          ></i>
+          <span
+            class="absolute rounded-full flex place-content-center place-items-center w-[20px] h-[20px] bg-red-600 text-white text-center text-sm -right-2 -top-2"
+            >{{ cartCount() }}</span
+          >
+        </button>
+        <button
+          class="cursor-pointer rounded-full transition-all w-12 h-12 text-center text-2xl"
+          (click)="toggleUserMenu()"
+          [ngClass]="{ 'text-white': isUserMenuOpen }"
+        >
+          <img
+            [src]="_UserAuthService.profilePicture | async"
+            alt="Profile"
+            class="w-full h-full object-cover rounded-full border-4 border-[#a14b4b]/30 shadow-md transition-transform duration-300 hover:scale-105"
+          />
+        </button>
+        <div
+          id="user-menu-desktop"
+          class="px-5 py-3 rounded-lg text-white absolute z-50 top-16 right-12 bg-gradient-to-r from-[#737373] via-[#a5a5a5] to-[#d9d9d9]"
+          [class.hidden]="!isUserMenuOpen"
+        >
+          <ul>
+            <li
+              class="flex items-center gap-5 mb-2 px-3 py-2 cursor-pointer hover:text-white"
+              *ngIf="!this._UserAuthService.isUserLogin.getValue()"
+              routerLink="/login"
+            >
+              <i class="fa-solid fa-arrow-right-to-bracket text-2xl"></i>
+              <a routerLink="/login" class="text-xl">Login</a>
+            </li>
+            <li
+              class="flex items-center gap-5 mb-2 px-3 py-2 cursor-pointer hover:text-white"
+              *ngIf="this._UserAuthService.isUserLogin.getValue()"
+            >
+              <i class="fa-solid fa-user text-2xl"></i>
+              <a routerLink="/profile" class="text-xl">Profile</a>
+            </li>
+            <li
+              class="flex items-center gap-5 mb-2 px-3 py-2 cursor-pointer hover:text-white"
+              *ngIf="this._UserAuthService.isUserLogin.getValue()"
+            >
+              <i class="fa-solid fa-sack-dollar text-2xl"></i>
+              <a routerLink="/orders" class="text-xl">Orders</a>
+            </li>
+            <li
+              class="flex items-center gap-5 px-3 py-2 hover:text-white cursor-pointer"
+              *ngIf="this._UserAuthService.isUserLogin.getValue()"
+              (click)="this._UserAuthService.logout()"
+            >
+              <i class="fa-solid fa-arrow-right-from-bracket text-2xl"></i>
+              <a class="text-xl cursor-pointer">Logout</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="md:hidden" [class.hidden]="!isMenuOpen">
+      <div class="pt-2 pb-3">
+        <a
+          routerLink="/home"
+          class="block py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+          >Home</a
+        >
+        <a
+          routerLink="/shop"
+          class="block py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+          >Shop</a
+        >
+        <a
+          routerLink="/about"
+          class="block py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+          >About</a
+        >
+        <a
+          routerLink="/contact"
+          class="block py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+          >Contact</a
+        >
+        <a
+          routerLink="/merchantReg"
+          class="block py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+          *ngIf="!_UserAuthService.isUserLogin.getValue()"
+          >Sell</a
+        >
+        <a
+          routerLink="/cart"
+          class="block py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+          *ngIf="_UserAuthService.isUserLogin.getValue()"
+          >Cart</a
+        >
+        <a
+          routerLink="/wishlist"
+          class="block py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+          *ngIf="_UserAuthService.isUserLogin.getValue()"
+          >Wishlist</a
+        >
+      </div>
+    </div>
+  </div>
+</nav>

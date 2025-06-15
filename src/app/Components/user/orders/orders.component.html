@@ -1,0 +1,111 @@
+<div class="min-h-screen bg-white p-4 md:p-6 lg:p-8">
+  <!-- Header -->
+  <div class="text-center mb-12 relative overflow-hidden">
+    <div
+      class="absolute inset-0 bg-[var(--main-color)]/10 transform -skew-y-6 -z-10"
+    ></div>
+    <h1
+      class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-800 bg-[var(--main-color)] bg-clip-text text-transparent relative z-10"
+    >
+      My Orders
+    </h1>
+    <p class="text-gray-600 mt-4 text-lg md:text-xl animate-fade-in-slow">
+      Track all your purchases with elegance and style
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center items-center h-64">
+    <div
+      class="animate-spin-slow rounded-full h-20 w-20 border-t-4 border-b-4 border-[var(--main-color)] shadow-lg"
+    ></div>
+  </div>
+
+  <!-- Error Message -->
+  <div
+    *ngIf="errorMessage()"
+    class="text-center text-red-600 font-semibold p-5 bg-red-50 rounded-xl shadow-xl border-l-4 border-red-500 transform transition-all duration-500 hover:scale-105"
+  >
+    {{ errorMessage() }}
+  </div>
+
+  <!-- Orders Grid -->
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    *ngIf="!loading() && orders().length > 0"
+  >
+    <div
+      *ngFor="let order of orders(); let i = index"
+      class="bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-500 hover:-translate-y-3 hover:shadow-4xl hover:rotate-1"
+    >
+      <!-- Card Header -->
+      <div class="bg-[var(--main-color)] p-5">
+        <h2 class="text-xl md:text-2xl font-bold text-white drop-shadow-md">
+          Order #{{ order.orderId }}
+        </h2>
+        <p class="text-sm md:text-base text-gray-100">
+          Placed by: {{ order.userName }}
+        </p>
+      </div>
+
+      <!-- Card Body -->
+      <div class="p-5">
+        <div class="space-y-3">
+          <p class="text-gray-800 text-lg">
+            <strong class="text-[var(--main-color)]">Status:</strong>
+            <span
+              class="ml-2 px-2 py-1 rounded-full text-sm font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-800': order.status === 'Recieved',
+                'bg-orange-100 text-orange-700': order.status === 'OnWay',
+                'bg-yellow-100 text-yellow-700': order.status === 'Pending'
+              }"
+            >
+              {{ order.status }}
+            </span>
+          </p>
+          <p class="text-gray-700 text-base">
+            <strong>Address:</strong> {{ order.address }}
+          </p>
+          <p class="text-gray-700 text-base">
+            <strong>Phone:</strong> {{ order.phone }}
+          </p>
+          <p class="text-gray-700 text-base">
+            <strong>Delivered by:</strong> {{ order.deliveryName }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="p-5 bg-gray-50 border-t border-gray-200">
+        <a
+          [routerLink]="['/order-details', order.orderId]"
+          class="w-full bg-[var(--main-color)] text-white py-3 rounded-lg font-semibold text-lg hover:bg-opacity-90 transition-all duration-500 transform hover:scale-110 block text-center shadow-md hover:shadow-lg"
+        >
+          View Details
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Orders Message -->
+  <div *ngIf="!loading() && orders().length === 0" class="text-center py-20">
+    <div class="relative">
+      <div
+        class="absolute inset-0 bg-[var(--main-color)]/5 rounded-full blur-md -z-10 animate-pulse-slow"
+      ></div>
+      <p class="text-3xl md:text-4xl text-gray-600 font-bold relative z-10">
+        No orders found.
+      </p>
+      <p class="text-gray-500 mt-3 text-base md:text-lg relative z-10">
+        Start shopping to see your orders here!
+      </p>
+    </div>
+    <button
+      (click)="router.navigate(['/shop'])"
+      class="mt-6 bg-[var(--main-color)] text-white py-3 px-8 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-500 transform hover:scale-110 shadow-md hover:shadow-lg"
+    >
+      Go to Shop
+    </button>
+  </div>
+</div>

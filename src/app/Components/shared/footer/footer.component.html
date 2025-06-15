@@ -1,0 +1,179 @@
+<footer class="bg-black">
+  <div class="mx-auto px-4 py-16 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4">
+      <div>
+        <p class="text-2xl font-medium text-white">Support</p>
+        <ul class="mt-5 flex flex-col gap-4 text-sm">
+          <li>
+            <a class="text-white text-lg" href="mailto:fcb6480@gmail.com">
+              Mail:
+              <span class="transition hover:text-[var(--main-color)]">
+                fcb6480&#64;gmail.com</span
+              >
+            </a>
+          </li>
+
+          <li>
+            <a
+              class="text-white text-lg"
+              href="https://wa.me/+201050102929"
+              target="_blank"
+            >
+              WhatsApp:
+              <span class="transition hover:text-[var(--main-color)]"
+                >+201050102929</span
+              >
+            </a>
+          </li>
+
+          <li>
+            <p class="text-white text-lg">Benha University</p>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="text-2xl font-medium text-white">Account</p>
+        <ul class="mt-5 flex flex-col gap-4 text-sm">
+          <li *ngIf="this.UserAuthService.isUserLogin.getValue()">
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              routerLink="/profile"
+            >
+              Profile
+            </a>
+          </li>
+          <li *ngIf="!this.UserAuthService.isUserLogin.getValue()">
+            <a
+              class="text-white cursor-pointer transition hover:text-[var(--main-color)] text-lg"
+              routerLink="/login"
+            >
+              Login / Register
+            </a>
+          </li>
+          <li *ngIf="!this.UserAuthService.isUserLogin.getValue()">
+            <a
+              class="text-white cursor-pointer transition hover:text-[var(--main-color)] text-lg"
+              routerLink="/merchantReg"
+            >
+              Sell
+            </a>
+          </li>
+          <li *ngIf="this.UserAuthService.isUserLogin.getValue()">
+            <a
+              class="text-white cursor-pointer transition hover:text-[var(--main-color)] text-lg"
+              routerLink="/orders"
+            >
+              Orders
+            </a>
+          </li>
+          <li>
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              routerLink="/cart"
+            >
+              Cart
+            </a>
+          </li>
+          <li>
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              routerLink="/wishlist"
+            >
+              Wishlist
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="text-2xl font-medium text-white">Quick Link</p>
+
+        <ul class="mt-5 flex flex-col gap-4 text-sm">
+          <li>
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              routerLink="/home"
+            >
+              Home
+            </a>
+          </li>
+
+          <li>
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              routerLink="/shop"
+            >
+              Shop
+            </a>
+          </li>
+
+          <li>
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              routerLink="/about"
+            >
+              About
+            </a>
+          </li>
+
+          <li>
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              routerLink="/contact"
+            >
+              Contact
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="text-2xl font-medium text-white">Follow Us</p>
+        <ul class="mt-5 flex flex-col gap-4 text-sm flex flex-row gap-5">
+          <li>
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              href="https://www.facebook.com/neyamrx3"
+              target="_blank"
+            >
+              <i class="fa-brands fa-facebook-f"></i>
+            </a>
+          </li>
+          <li>
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              href="https://www.linkedin.com/in/mo7amedtarek/"
+              target="_blank"
+            >
+              <i class="fa-brands fa-linkedin-in"></i>
+            </a>
+          </li>
+          <li>
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              href="https://github.com/Motarek175"
+              target="_blank"
+            >
+              <i class="fa-brands fa-github"></i>
+            </a>
+          </li>
+          <li>
+            <a
+              class="text-white transition hover:text-[var(--main-color)] text-lg"
+              href="https://www.instagram.com/mohamed.tarek.15/"
+              target="_blank"
+            >
+              <i class="fa-brands fa-instagram"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <p
+    class="text-md text-gray-400 text-center py-5 border-t text-white opacity-35"
+  >
+    &copy; CopyRight Team 2025 ,All rights reserved
+  </p>
+</footer>
