@@ -1,0 +1,542 @@
+<!-- Product Section -->
+<div class="mx-auto px-4 my-10 md:my-16 lg:px-12 lg:my-20 rounded-xl">
+  <div *ngIf="!product" class="text-center py-12">
+    <i class="fa-solid fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+    <p class="text-xl font-semibold text-gray-600">Product not found</p>
+  </div>
+  <div *ngIf="product" class="flex flex-col sm:flex-row gap-4 p-2 md:p-4">
+    <!-- Product Images (Left Side) -->
+    <div class="w-full md:w-1/2 flex flex-col gap-2">
+      <!-- Main Image -->
+      <div class="mainimg w-full relative overflow-hidden rounded-xl">
+        <img
+          [src]="selectedImage || 'https://fakeimg.pl/300/'"
+          alt="{{ product.title || '' }}"
+          class="w-full h-[400px] object-contain rounded-xl"
+          (error)="onImageError(selectedImage)"
+        />
+      </div>
+      <!-- Variants -->
+      <div
+        class="variants w-full flex justify-center sm:justify-start flex-row gap-2 overflow-x-auto"
+      >
+        @for (img of prodImages; track img; let i = $index) {
+        <img
+          [src]="img"
+          alt="{{ product.title || '' }} variant {{ i + 1 }}"
+          class="w-[120px] h-[120px] object-cover rounded-lg cursor-pointer"
+          [ngClass]="{
+            'border-4 border-[var(--main-color)]': selectedImage === img,
+            'border-2 border-gray-200': selectedImage !== img
+          }"
+          (click)="selectImage(img)"
+          (error)="onImageError(img)"
+        />
+        }
+      </div>
+    </div>
+
+    <!-- Product Details (Right Side) -->
+    <div class="w-full md:w-1/2 p-2">
+      <!-- Name -->
+      <h2 class="text-4xl font-extrabold text-gray-800">
+        {{ product.title || "" }}
+      </h2>
+
+      <!-- merchant -->
+      <div class="mb-4 flex items-center gap-1">
+        <a
+          title="visit Merchant Product"
+          [routerLink]="['/merchant-page', product.merchantId]"
+          class="text-sm font-black italic text-[var(--main-color)] cursor-pointer underline"
+          >Merchant: {{ product.merchantName }}
+        </a>
+        <span class="flex items-center mt-1">
+          @for (i of [1, 2, 3, 4, 5]; track i) {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-3 h-3 mr-1 transition-colors duration-300 transform"
+            [ngClass]="{
+              'text-yellow-500': i <= product.merchantFeedbak,
+              'text-gray-300': i > product.merchantFeedbak
+            }"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.760-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          }</span
+        >
+      </div>
+      <!-- Stars Input for Rating -->
+      <div class="flex items-center mb-4">
+        <div class="flex items-center">
+          @for (i of [1, 2, 3, 4, 5]; track i) {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-7 h-7 mr-1 star-rating"
+            [ngClass]="{
+              'text-yellow-500':
+                i <=
+                (hoverStarRatingValue ||
+                  selectedStarRating ||
+                  product.personStar ||
+                  0),
+              'text-gray-300':
+                i >
+                (hoverStarRatingValue ||
+                  selectedStarRating ||
+                  product.personStar ||
+                  0),
+              'cursor-not-allowed': product.personStar || newCommentData,
+              'cursor-pointer': !(product.personStar || newCommentData)
+            }"
+            (click)="
+              !(product.personStar || newCommentData) && selectStarRating(i)
+            "
+            (mouseenter)="
+              !(product.personStar || newCommentData) && hoverStarRating(i)
+            "
+            (mouseleave)="
+              !(product.personStar || newCommentData) && resetHoverStarRating()
+            "
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.760-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          }
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="mb-4">
+        <span class="text-3xl font-bold text-gray-800 mr-1">
+          ${{ (product.sellPrice || product.unitPrice || 0).toFixed(2) }}
+        </span>
+        <span
+          *ngIf="product.discount > 0"
+          class="line-through text-gray-500 ml-1"
+        >
+          ${{ (product.unitPrice || 0).toFixed(2) }}
+        </span>
+        <span *ngIf="product.discount > 0" class="text-green-600 ml-1">
+          {{ product.discount }}% OFF
+        </span>
+      </div>
+      <!-- Description -->
+      <p class="text-gray-700 mb-4 text-lg leading-tight">
+        {{ product.description || "No description available." }}
+      </p>
+      <!-- Status -->
+      <div class="mb-4 flex items-center gap-1">
+        <span class="font-semibold text-xl text-gray-700">Status:</span>
+        <span
+          class="px-2 py-1 rounded-full text-sm font-medium"
+          [ngClass]="{
+            'bg-green-100 text-green-800': product.status === 'Active',
+            'bg-yellow-100 text-yellow-800': product.status === 'Pending',
+            'bg-gray-300 text-gray-800': product.status === 'OutOfStock'
+          }"
+        >
+          {{ product.status || "Unknown" }}
+        </span>
+      </div>
+      <!-- Color -->
+      <div class="mb-4 flex gap-2 items-center">
+        <h3 class="text-xl font-semibold text-gray-800">Color:</h3>
+        <div class="flex gap-2" *ngIf="product.status !== 'OutOfStock'">
+          @for (color of product.color || []; track color; let i = $index) {
+          <button
+            class="w-8 h-8 rounded-full border-2 focus:outline-none transition-all duration-300"
+            [style.background]="getGradientColor(color)"
+            [ngClass]="{
+              'border-[var(--main-color)] ring-2 ring-[var(--main-color)] ring-offset-2 opacity-75 cursor-default':
+                selectedColor === color,
+              'border-gray-200 hover:ring-1 hover:ring-gray-400':
+                selectedColor !== color
+            }"
+            (click)="selectColor(color, product.colorId[i])"
+            [title]="color"
+          ></button>
+          }
+        </div>
+      </div>
+
+      <!-- Size -->
+      <div class="mb-4 flex items-center gap-2">
+        <h3 class="text-xl font-semibold text-gray-800">Size:</h3>
+        <div
+          class="flex items-center gap-2"
+          *ngIf="product.status !== 'OutOfStock'"
+        >
+          @if (availableSizes.length > 0) { @for (size of availableSizes; track
+          size) {
+          <button
+            class="border-2 cursor-pointer px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 hover:bg-[var(--main-color)] hover:text-white"
+            [ngClass]="{
+              'border-[var(--main-color)] bg-[var(--main-color)] text-white':
+                selectedSize === size,
+              'border-gray-200 text-gray-600': selectedSize !== size
+            }"
+            (click)="selectSize(size)"
+          >
+            {{ size }}
+          </button>
+          } } @else {
+          <p class="text-gray-500 text-sm">
+            Please select a color to view available sizes.
+          </p>
+          }
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-2 mt-4">
+        <button
+          class="flex-1 bg-[var(--main-color)] cursor-pointer px-4 py-2 text-white rounded-lg font-bold text-lg shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50"
+          (click)="toggleCart()"
+          [disabled]="product.status === 'OutOfStock'"
+        >
+          Add to Cart
+        </button>
+        <button
+          class="flex-1 cursor-pointer bg-gray-800 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50"
+          (click)="tryIt()"
+          [disabled]="product.status === 'OutOfStock'"
+        >
+          Try It
+        </button>
+        <div class="flex items-center justify-center">
+          @if (isInWishlist(product.id)) {
+          <button
+            class="cursor-pointer rounded-full text-red-600 font-bold text-lg hover:text-red-800 transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-gray-600"
+            (click)="toggleWishlist()"
+            [disabled]="product.status === 'OutOfStock'"
+          >
+            <i class="fa-solid fa-heart text-2xl"></i>
+          </button>
+          } @else {
+          <button
+            class="cursor-pointer rounded-full text-gray-600 font-bold text-lg hover:text-red-600 transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-gray-600"
+            (click)="toggleWishlist()"
+            [disabled]="product.status === 'OutOfStock'"
+          >
+            <i class="fa-solid fa-heart text-2xl"></i>
+          </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Comments Section -->
+<section class="mx-auto px-4 my-10 md:my-16 lg:px-12 lg:my-20">
+  <div class="bg-white rounded-2xl shadow-2xl p-6 border border-gray-100">
+    <div class="mb-6 border-b-4 border-[var(--main-color)] pb-4">
+      <h2
+        class="text-2xl lg:text-4xl font-extrabold text-[var(--main-color)] bg-gradient-to-r from-[var(--main-color)] to-gray-800 bg-clip-text text-transparent"
+      >
+        Customer Feedback
+      </h2>
+      <div class="flex items-center mt-4">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          class="w-7 h-7 mr-1 transition-colors duration-300 transform hover:scale-110"
+          [ngClass]="{
+            'text-yellow-500': i <= averageRating(),
+            'text-gray-300': i > averageRating()
+          }"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.760-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        }
+        <span class="ml-3 text-xl font-semibold text-gray-700"
+          >{{ product?.originalComment?.length || 0 }}
+          <span class="text-[12px] italic">Average Reviews </span></span
+        >
+      </div>
+    </div>
+    <div class="py-6">
+      @if (product && (product.originalComment || newCommentData)) { @for
+      (comment of (product.originalComment || []); track comment; let i =
+      $index) {
+      <div
+        class="flex gap-6 mb-6 p-5 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+      >
+        <div class="img">
+          <img
+            src="https://static-00.iconduck.com/assets.00/person-icon-2048x1935-84jiekjd.png"
+            alt="User"
+            class="w-16 h-16 rounded-full object-cover border-2 border-[var(--main-color)] shadow-md"
+          />
+        </div>
+        <div class="review flex-1 relative">
+          <h2 class="text-xl lg:text-2xl font-bold text-gray-900">
+            {{ product.userName[i] }}
+          </h2>
+          <div class="flex items-center mb-2">
+            @for (j of [1, 2, 3, 4, 5]; track j) {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="w-3 h-3 mr-1 transition-colors duration-300 cursor-pointer"
+              [ngClass]="{
+                'text-yellow-500': j <= product.allStars[i] ,
+                'text-gray-300': j > product.allStars[i] ,
+              }"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.760-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            }
+          </div>
+          <p class="text-gray-700 text-base lg:text-lg leading-relaxed">
+            {{ comment || "No comment provided" }}
+            <span class="italic text-sm font-black">
+              (Sentiment: {{ sentiment[i] }}, CommentRate:
+              {{ product.commentRate[i] }})</span
+            >
+          </p>
+          <!-- Delete Icon -->
+          <button
+            *ngIf="customerPersonName === product.userName[i]"
+            class="absolute right-0 top-1/2 cursor-pointer transform -translate-y-1/2 text-red-600 hover:text-red-800 transition-colors duration-300"
+            (click)="deleteComment(product.id, comment, i)"
+            title="Delete Comment"
+          >
+            <i class="fa-solid fa-trash text-lg"></i>
+          </button>
+        </div>
+      </div>
+      }
+      <!-- Display New Comment Immediately -->
+      @if (newCommentData) {
+      <div
+        class="flex gap-6 mb-6 p-5 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+      >
+        <div class="img">
+          <img
+            src="https://static-00.iconduck.com/assets.00/person-icon-2048x1935-84jiekjd.png"
+            alt="User"
+            class="w-16 h-16 rounded-full object-cover border-2 border-[var(--main-color)] shadow-md"
+          />
+        </div>
+        <div class="review flex-1 relative">
+          <h2 class="text-xl lg:text-2xl font-bold text-gray-900">
+            {{ customerPersonName }}
+          </h2>
+          <div class="flex items-center mb-2">
+            @for (j of [1, 2, 3, 4, 5]; track j) {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="w-3 h-3 mr-1 transition-all duration-300"
+              [ngClass]="{
+                'text-yellow-500': j <= newCommentData.star,
+                'text-gray-300': j > newCommentData.star
+              }"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.760-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            }
+          </div>
+          <p class="text-gray-700 text-base lg:text-lg leading-relaxed">
+            {{ newCommentData.originalComment || "No comment provided" }}
+          </p>
+          <!-- Delete Icon -->
+          <button
+            class="absolute right-0 cursor-pointer top-1/2 transform -translate-y-1/2 text-red-600 hover:text-red-800 transition-colors duration-300"
+            (click)="deleteNewComment()"
+            title="Delete Comment"
+          >
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      } } @else {
+      <p class="text-center text-gray-500 text-lg py-6">No reviews yet.</p>
+      }
+    </div>
+    <form
+      class="relative mt-6"
+      (ngSubmit)="submitComment()"
+      #commentForm="ngForm"
+    >
+      <input
+        #commentInput
+        name="newComment"
+        class="w-full outline-none text-sm lg:text-base text-gray-900 border border-gray-300 rounded-xl px-5 py-3 bg-white focus:ring-4 focus:ring-[var(--main-color)]/50 transition-all duration-300 shadow-sm"
+        placeholder="Add Your Comment..."
+        [(ngModel)]="newComment"
+        (ngModelChange)="onCommentChange()"
+        [disabled]="!!product?.personStar || !!newCommentData"
+        required
+      />
+      <button
+        type="submit"
+        class="absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 bg-[var(--main-color)] text-white p-2 rounded-full hover:bg-opacity-90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-110"
+        [disabled]="
+          !commentForm.valid ||
+          !newComment.trim() ||
+          !!product?.personStar ||
+          !!newCommentData
+        "
+      >
+        <svg
+          class="w-5 h-5 rotate-90"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"
+          ></path>
+        </svg>
+      </button>
+      <div *ngIf="loading" class="mt-2 text-center">
+        <p class="text-sm lg:text-base text-gray-600 animate-pulse">
+          Processing your comment...
+        </p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- Related Product Section -->
+<div class="container mx-auto p-6">
+  <h2 class="text-2xl font-bold mb-6">Related Products</h2>
+  <div
+    *ngIf="loadingRelatedProducts"
+    class="flex items-center justify-center py-12"
+  >
+    <svg
+      class="animate-spin h-10 w-10 text-[var(--main-color)]"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        class="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="4"
+      ></circle>
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
+    </svg>
+  </div>
+  <div
+    *ngIf="!loadingRelatedProducts && relatedProducts().length === 0"
+    class="text-center py-12 animate-pulse"
+  >
+    <i class="fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"></i>
+    <p class="text-xl font-semibold text-gray-600">No related products found</p>
+  </div>
+  <div
+    *ngIf="!loadingRelatedProducts && relatedProducts().length > 0"
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+  >
+    <div
+      *ngFor="let product of relatedProducts(); trackBy: trackByProductId"
+      class="relative cursor-pointer rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1"
+      [routerLink]="['/product', product.id]"
+    >
+      <a class="block">
+        <img
+          class="rounded-t-lg w-full h-72 object-fill"
+          [src]="product.image"
+          [alt]="product.title"
+          (error)="onImageError(product.image)"
+        />
+      </a>
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h5
+            class="text-xl font-semibold text-gray-600"
+            [title]="product.title"
+          >
+            {{ product.title }}
+          </h5>
+          <span class="text-sm text-gray-500">
+            {{ product.categoryName }}
+          </span>
+        </div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="font-semibold text-xl text-gray-600">Status:</span>
+          <span
+            class="px-2 py-1 rounded text-sm font-medium"
+            [ngClass]="{
+              'bg-green-100 text-green-800': product.status === 'Active',
+              'bg-yellow-100 text-yellow-800': product.status === 'Pending'
+            }"
+          >
+            {{ product.status }}
+          </span>
+        </div>
+        <div class="text-lg font-medium text-gray-600">
+          <span
+            class="mr-2"
+            [ngClass]="{
+              'line-through text-gray-400': product.discount > 0,
+              'text-gray-600': product.discount === 0
+            }"
+          >
+            Price: ${{ product.unitPrice | number : "1.2-2" }}
+          </span>
+          <span
+            *ngIf="product.discount > 0"
+            class="text-green-600 font-semibold ml-2"
+          >
+            ${{
+              product.unitPrice * (1 - product.discount / 100)
+                | number : "1.2-2"
+            }}
+          </span>
+        </div>
+      </div>
+      <button
+        (click)="toggleWishlistRelated(product.id); $event.stopPropagation()"
+        class="absolute outline-0 right-2 top-2 bg-white px-2 py-1 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-300"
+        [ngClass]="{
+          'opacity-50 cursor-not-allowed': !UserAuthService.isUserLogin.value,
+          'hover:text-red-600':
+            UserAuthService.isUserLogin.value && !isInWishlist(product.id),
+          'text-red-600': isInWishlist(product.id)
+        }"
+      >
+        <i class="text-xl transition-all duration-300 fa-solid fa-heart"></i>
+      </button>
+    </div>
+  </div>
+</div>

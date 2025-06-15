@@ -1,0 +1,277 @@
+<!-- Loader -->
+<div
+  *ngIf="loading()"
+  class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50"
+>
+  <div class="flex flex-col items-center gap-3">
+    <svg
+      class="animate-spin h-10 w-10 text-[var(--main-color)]"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        class="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="4"
+      ></circle>
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
+    </svg>
+    <span class="text-lg font-medium text-gray-600">Loading...</span>
+  </div>
+</div>
+
+<!-- Main Content (hidden while loading) -->
+<div
+  *ngIf="!loading()"
+  class="container mx-auto p-6 flex flex-col lg:flex-row gap-6"
+>
+  <!-- Sidebar Filters -->
+  <aside class="w-full lg:w-1/4 h-fit bg-white rounded-lg shadow-lg p-6">
+    <h2 class="text-2xl font-bold mb-6">Filters</h2>
+
+    <!-- Search -->
+    <div class="mb-6">
+      <div *ngIf="isSearchOpen()" class="mt-3">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="applyFilters()"
+          placeholder="Search products..."
+          class="w-full p-2 border rounded-lg focus:outline-0 transition-all duration-300 hover:border-[var(--main-color)] focus:border-[var(--main-color)]"
+        />
+      </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="mb-6">
+      <button
+        class="w-full flex justify-between items-center text-lg font-semibold text-gray-700 hover:text-[var(--main-color)] transition-colors duration-300"
+        (click)="toggleCategoryFilter()"
+      >
+        Category
+        <i
+          class="fa-solid"
+          [ngClass]="getArrowClass(isCategoryOpen())"
+          [attr.data-open]="isCategoryOpen()"
+        ></i>
+      </button>
+      <div *ngIf="isCategoryOpen()" class="mt-3 flex flex-col gap-2">
+        <label
+          class="flex items-center hover:bg-gray-100 p-1 rounded transition-all duration-200"
+        >
+          <input
+            type="radio"
+            name="category"
+            value=""
+            [(ngModel)]="selectedCategory"
+            (ngModelChange)="applyFilters()"
+            class="mr-2"
+          />
+          All Categories
+        </label>
+        <label
+          *ngFor="let category of categories()"
+          class="flex items-center hover:bg-gray-100 p-1 rounded transition-all duration-200"
+        >
+          <input
+            type="radio"
+            name="category"
+            [value]="category"
+            [(ngModel)]="selectedCategory"
+            (ngModelChange)="applyFilters()"
+            class="mr-2"
+          />
+          {{ category }}
+        </label>
+      </div>
+    </div>
+
+    <!-- Price Range Filter -->
+    <div class="mb-6">
+      <button
+        class="w-full flex justify-between items-center text-lg font-semibold text-gray-600 hover:text-[var(--main-color)] transition-colors duration-300"
+        (click)="togglePriceFilter()"
+      >
+        Price Range
+        <i
+          class="fa-solid"
+          [ngClass]="getArrowClass(isPriceOpen())"
+          [attr.data-open]="isPriceOpen()"
+        ></i>
+      </button>
+      <div *ngIf="isPriceOpen()" class="mt-3 flex flex-col gap-2">
+        <input
+          type="number"
+          placeholder="Min Price"
+          [(ngModel)]="minPrice"
+          (ngModelChange)="applyFilters()"
+          class="w-full p-2 border rounded-lg transition-all duration-300 hover:border-[var(--main-color)] focus:border-[var(--main-color)]"
+        />
+        <input
+          type="number"
+          placeholder="Max Price"
+          [(ngModel)]="maxPrice"
+          (ngModelChange)="applyFilters()"
+          class="w-full p-2 border rounded-lg transition-all duration-300 hover:border-[var(--main-color)] focus:border-[var(--main-color)]"
+        />
+      </div>
+    </div>
+
+    <!-- Sort -->
+    <div>
+      <button
+        class="w-full flex justify-between items-center text-lg font-semibold text-gray-600 hover:text-[var(--main-color)] transition-colors duration-300"
+        (click)="toggleSortFilter()"
+      >
+        Sort By
+        <i
+          class="fa-solid"
+          [ngClass]="getArrowClass(isSortOpen())"
+          [attr.data-open]="isSortOpen()"
+        ></i>
+      </button>
+      <div *ngIf="isSortOpen()" class="mt-3 flex flex-col gap-2">
+        <select
+          [(ngModel)]="sortOption"
+          (ngModelChange)="applyFilters()"
+          class="w-full p-2 border rounded-lg transition-all duration-300 hover:border-[var(--main-color)] focus:border-[var(--main-color)]"
+        >
+          <option value="title-asc">Title (A-Z)</option>
+          <option value="title-desc">Title (Z-A)</option>
+          <option value="sellPrice-asc">Price (Low to High)</option>
+          <option value="sellPrice-desc">Price (High to Low)</option>
+        </select>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="flex-1">
+    <!-- Product Grid -->
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6"
+    >
+      <div
+        *ngIf="paginatedProducts().length === 0"
+        class="col-span-full text-center py-12 animate-pulse"
+      >
+        <i class="fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"></i>
+        <p class="text-xl font-semibold text-gray-600">No products found</p>
+      </div>
+      <div
+        *ngFor="let product of paginatedProducts(); trackBy: trackByProductId"
+        class="relative cursor-pointer rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300 transform hover:-translate-y-1"
+        [routerLink]="['/product', product.id]"
+      >
+        <a class="block">
+          <img
+            class="rounded-t-lg w-full h-72 object-fill"
+            [src]="product.image"
+            [alt]="product.title"
+            (error)="onImageError($event)"
+          />
+        </a>
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h5
+              class="text-xl font-semibold text-gray-600"
+              [title]="product.title"
+            >
+              {{ product.title }}
+            </h5>
+            <span class="text-sm text-gray-500">
+              {{ product.categoryName }}
+            </span>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="font-semibold text-xl text-gray-600">Status:</span>
+            <span
+              class="px-2 py-1 rounded text-sm font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-800': product.status === 'Active',
+                'bg-yellow-100 text-yellow-800': product.status === 'Pending'
+              }"
+            >
+              {{ product.status }}
+            </span>
+          </div>
+          <div class="text-lg font-medium text-gray-600">
+            <span
+              class="mr-2"
+              [ngClass]="{
+                'line-through text-gray-400': product.discount > 0,
+                'text-gray-600': product.discount === 0
+              }"
+            >
+              Price: ${{ product.unitPrice | number : "1.2-2" }}
+            </span>
+            <!-- Show sellPrice if discount exists -->
+            <span
+              *ngIf="product.discount > 0"
+              class="text-green-600 font-semibold ml-2"
+            >
+              ${{
+                product.unitPrice * (1 - product.discount / 100)
+                  | number : "1.2-2"
+              }}
+            </span>
+          </div>
+        </div>
+        <button
+          (click)="toggleWishlist(product.id)"
+          class="absolute outline-0 right-2 top-2 bg-white px-2 py-1 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-300"
+          [ngClass]="{
+            'opacity-50 cursor-not-allowed': !userAuthService.isUserLogin.value,
+            'hover:text-red-600':
+              userAuthService.isUserLogin.value && !isInWishlist(product.id),
+            'text-red-600': isInWishlist(product.id)
+          }"
+        >
+          <i class="text-xl transition-all duration-300 fa-solid fa-heart"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Pagination -->
+    <div
+      class="flex justify-center mt-8"
+      *ngIf="paginatedProducts().length !== 0"
+    >
+      <nav class="inline-flex rounded-lg p-2">
+        <button
+          [disabled]="currentPage() === 1"
+          (click)="changePage(currentPage() - 1)"
+          class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed transition-colors duration-200 hover:bg-white rounded-l-lg"
+        >
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button
+          *ngFor="let page of pageNumbers()"
+          (click)="changePage(page)"
+          class="px-4 py-2 cursor-pointer rounded"
+          [ngClass]="{
+            'bg-[var(--main-color)] text-white border-[var(--main-color)] rounded-full w-10 h-10 flex items-center justify-center':
+              currentPage() === page,
+            '': currentPage() !== page
+          }"
+        >
+          {{ page }}
+        </button>
+        <button
+          [disabled]="currentPage() === totalPages()"
+          (click)="changePage(currentPage() + 1)"
+          class="px-4 py-2 cursor-pointer bg-transparent disabled:cursor-not-allowed transition-colors duration-200 hover:bg-white rounded-r-lg"
+        >
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </nav>
+    </div>
+  </div>
+</div>

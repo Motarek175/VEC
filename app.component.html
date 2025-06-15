@@ -1,0 +1,63 @@
+<div class="relative">
+  <!-- nav -->
+  <app-navbar
+    *ngIf="!(authPage | async) && !(notCustomerPage | async)"
+  ></app-navbar>
+  <!-- router -->
+  <router-outlet></router-outlet>
+  <!-- Last -->
+  <div
+    class="flex flex-col gap-10 sm:flex-row justify-center items-center md:gap-10 lg:gap-20 mt-20 my-10"
+    *ngIf="!(authPage | async) && !(notCustomerPage | async)"
+  >
+    <div class="Delivery flex flex-col items-center justify-center gap-5">
+      <div
+        class="icon bg-black w-15 h-15 rounded-full flex items-center justify-center outline-8 outline-[#a0a0a0]"
+      >
+        <i class="fa-solid fa-truck text-white text-2xl place-self-center"></i>
+      </div>
+      <div class="text">
+        <h2 class="font-bold text-xl text-center">FREE AND FAST DELIVERY</h2>
+        <p class="text-center">Free delivery for all orders over $140</p>
+      </div>
+    </div>
+    <div
+      class="Customer Service flex flex-col items-center justify-center gap-5"
+    >
+      <div
+        class="icon bg-black w-15 h-15 rounded-full flex items-center justify-center outline-8 outline-[#a0a0a0]"
+      >
+        <i
+          class="fa-solid fa-headset text-white text-2xl place-self-center"
+        ></i>
+      </div>
+      <div class="text">
+        <h2 class="font-bold text-xl text-center">24/7 CUSTOMER SERVICE</h2>
+        <p class="text-center">Friendly 24/7 customer support</p>
+      </div>
+    </div>
+    <div class="money Back flex flex-col items-center justify-center gap-5">
+      <div
+        class="icon bg-black w-15 h-15 rounded-full flex items-center justify-center outline-8 outline-[#a0a0a0]"
+      >
+        <i
+          class="fa-solid fa-dollar-sign text-white text-2xl place-self-center"
+        ></i>
+      </div>
+      <div class="text">
+        <h2 class="font-bold text-xl text-center">MONEY BACK GUARANTEE</h2>
+        <p class="text-center">We return money within 30 days</p>
+      </div>
+    </div>
+  </div>
+  <!-- footer -->
+  <app-footer *ngIf="!(notCustomerPage | async)"></app-footer>
+  <!-- scroll to top -->
+  <button
+    class="fixed transition-all origin-right duration-300 ease-linear right-0 bottom-5 bg-[var(--main-color)] rounded-s-2xl shadow-xl border-none cursor-pointer w-10 h-10"
+    (click)="scrollToTop()"
+    [ngClass]="showButton ? 'opacity-100' : 'opacity-0'"
+  >
+    <i class="fa-solid fa-arrow-up cursor-pointer text-white text-xl"></i>
+  </button>
+</div>

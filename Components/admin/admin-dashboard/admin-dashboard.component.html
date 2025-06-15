@@ -1,0 +1,1443 @@
+<div class="flex flex-col md:flex-row">
+  <!-- Sidebar -->
+  <div class="relative">
+    <aside
+      class="w-full md:w-64 bg-[var(--main-color)] text-white flex flex-col md:min-h-[100vh]"
+    >
+      <!-- Main navigation section -->
+      <div class="p-4 md:pb-0 flex-grow overflow-y-auto">
+        <h2 class="text-xl p-2 font-bold mb-4">Admin Dashboard</h2>
+        <nav>
+          <ul>
+            <!-- Home -->
+            <li>
+              <a
+                (click)="
+                  currentSection = 'home';
+                  selectedCustomer = null;
+                  sidebarOpen = false
+                "
+                class="block p-2 rounded cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md"
+                [class.bg-gray-500]="currentSection === 'home'"
+              >
+                <i class="fa-solid fa-home mr-2"></i> Home
+              </a>
+            </li>
+            <!-- Customers -->
+            <li>
+              <a
+                (click)="
+                  currentSection = 'customers';
+                  selectedCustomer = null;
+                  sidebarOpen = false
+                "
+                class="block p-2 rounded cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md"
+                [class.bg-gray-500]="currentSection === 'customers'"
+              >
+                <i class="fa-solid fa-users mr-2"></i> Customers
+              </a>
+            </li>
+            <!-- Merchants -->
+            <li>
+              <a
+                (click)="
+                  currentSection = 'merchants';
+                  selectedMerchant = null;
+                  sidebarOpen = false
+                "
+                class="block p-2 rounded cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md"
+                [class.bg-gray-500]="currentSection === 'merchants'"
+              >
+                <i class="fa-solid fa-store mr-2"></i> Merchants
+              </a>
+            </li>
+            <!-- Delivery -->
+            <li>
+              <a
+                (click)="
+                  currentSection = 'delivery';
+                  selectedDeliveryRep = null;
+                  showAddForm = false;
+                  sidebarOpen = false
+                "
+                class="block p-2 rounded cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md"
+                [class.bg-gray-500]="currentSection === 'delivery'"
+              >
+                <i class="fa-solid fa-truck-fast mr-2"></i> Delivery
+              </a>
+            </li>
+            <!-- Orders -->
+            <li>
+              <a
+                (click)="
+                  currentSection = 'orders';
+                  selectedOrder = null;
+                  sidebarOpen = false
+                "
+                class="block p-2 rounded cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md"
+                [class.bg-gray-500]="currentSection === 'orders'"
+              >
+                <i class="fa-solid fa-truck mr-2"></i> Orders
+              </a>
+            </li>
+            <!-- Products -->
+            <li>
+              <a
+                (click)="
+                  currentSection = 'products';
+                  selectedProduct = null;
+                  sidebarOpen = false
+                "
+                class="block p-2 rounded cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md"
+                [class.bg-gray-500]="currentSection === 'products'"
+              >
+                <i class="fa-solid fa-box mr-2"></i> Products
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Profile Section -->
+      <div
+        class="w-full hidden md:block flex flex-col gap-3 px-4 py-4 bg-[var(--main-color)] mt-auto"
+      >
+        <div class="flex flex-row">
+          <div
+            class="w-12 h-12 bg-white rounded-full flex flex-row items-center justify-center text-[var(--main-color)] font-bold text-xl"
+          >
+            {{ this.adminPersonName[0] }}
+          </div>
+          <div class="flex flex-row items-center justify-between flex-1">
+            <div class="ml-3">
+              <p class="font-semibold text-lg">{{ this.adminPersonName }}</p>
+              <p class="text-sm text-gray-300">{{ this.decodedToken.Role }}</p>
+            </div>
+            <div>
+              <a
+                (click)="this._UserAuthService.logout()"
+                class="text-xl cursor-pointer"
+              >
+                <i class="fa-solid fa-arrow-right-from-bracket text-2xl"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-3 relative">
+    <!-- Home Section -->
+    <div *ngIf="currentSection === 'home'" class="px-4 animate-fade-in">
+      <h1 class="text-3xl font-bold mb-4 text-gray-800 tracking-tight">
+        Welcome {{ this.adminPersonName }} to Admin Dashboard
+      </h1>
+      <p class="text-gray-600 mb-6 leading-relaxed">
+        Take full control of your e-commerce platform. Navigate the tabs above
+        to manage products, orders, merchants, customers, and delivery reps
+        effortlessly.
+      </p>
+      <img
+        src="./assets/welcome.jpg"
+        alt="Welcome"
+        class="mx-auto w-[400px] rounded-lg"
+      />
+    </div>
+
+    <!-- Customers Section (Done) -->
+    <div *ngIf="currentSection === 'customers'" class="animate-fade-in">
+      <h1 class="text-3xl font-bold mb-4 text-gray-800 tracking-tight">
+        All Customers
+      </h1>
+      <div *ngIf="loading" class="text-center py-12">
+        <i class="fa-solid fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
+        <p class="text-xl font-semibold text-gray-600">Loading customers...</p>
+      </div>
+      <div
+        *ngIf="!loading && paginatedCustomers.length === 0"
+        class="text-center py-12"
+      >
+        <i class="fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"></i>
+        <p class="text-xl font-semibold text-gray-600">No customers found</p>
+      </div>
+      <!-- Customers Summary -->
+      <div *ngIf="!loading && paginatedCustomers.length > 0" class="grid gap-4">
+        <div
+          *ngFor="
+            let customer of paginatedCustomers;
+            trackBy: trackByCustomerId
+          "
+          (click)="selectCustomer(customer)"
+          class="p-4 border rounded-lg cursor-pointer bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+        >
+          <div class="flex justify-between">
+            <div>
+              <h3 class="font-semibold text-lg text-gray-800">
+                {{ customer.customerName }}
+              </h3>
+              <p class="text-sm text-gray-500">ID: {{ customer.customerId }}</p>
+              <p class="text-sm text-gray-500">
+                Orders: {{ customer.ordercount }}
+              </p>
+            </div>
+            <div class="text-right">
+              <span
+                class="px-2 py-1 rounded text-sm font-medium"
+                [ngClass]="{
+                  'text-green-600 bg-green-100': customer.status === 'Active',
+                  'text-gray-600 bg-gray-100': customer.status === 'Inactive',
+                  'text-red-600 bg-red-100': customer.status === 'Banned'
+                }"
+              >
+                {{ customer.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Customers Pagination -->
+      <div
+        class="flex justify-center mt-6"
+        *ngIf="!loading && paginatedCustomers.length !== 0"
+      >
+        <nav class="inline-flex rounded-lg">
+          <button
+            [disabled]="currentCustomersPage === 1"
+            (click)="changeCustomersPage(currentCustomersPage - 1)"
+            class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hover:bg-gray-100 transition-colors duration-200"
+          >
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button
+            *ngFor="let page of getCustomersPageNumbers()"
+            (click)="changeCustomersPage(page)"
+            class="px-3 py-1 cursor-pointer mx-1"
+            [ngClass]="{
+              'bg-gradient-to-r from-[#703232] to-[#a14b4b] text-white border-none rounded-full w-10 h-10 flex items-center justify-center':
+                currentCustomersPage === page,
+              'hover:bg-gray-100': currentCustomersPage !== page
+            }"
+          >
+            {{ page }}
+          </button>
+          <button
+            [disabled]="currentCustomersPage === totalCustomersPages"
+            (click)="changeCustomersPage(currentCustomersPage + 1)"
+            class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hover:bg-gray-100 transition-colors duration-200"
+          >
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </nav>
+      </div>
+      <!-- Selected Customer Modal -->
+      <div
+        *ngIf="selectedCustomer"
+        class="fixed backdrop-blur-xs inset-0 flex items-center justify-center z-50 animate-scale-in"
+      >
+        <div
+          class="relative bg-white rounded-lg p-6 w-full max-w-md shadow-2xl transform transition-all backdrop-blur-sm"
+        >
+          <button
+            (click)="cancelCustomerEdit()"
+            class="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+          >
+            <i class="fa-solid fa-times text-xl"></i>
+          </button>
+          <h2 class="text-2xl font-semibold mb-4 text-gray-800">
+            Customer ID: {{ selectedCustomer.customerId }}
+          </h2>
+          <p class="text-gray-700 mb-2">
+            Name: {{ selectedCustomer.customerName }}
+          </p>
+          <p class="text-gray-700 mb-4">
+            Total Orders: {{ selectedCustomer.ordercount }}
+          </p>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Status</label
+            >
+            <div *ngIf="!editingCustomerStatus" class="flex items-center">
+              <span
+                class="px-2 py-1 rounded text-sm font-medium"
+                [ngClass]="{
+                  'text-green-600 bg-green-100':
+                    selectedCustomer.status === 'Active',
+                  'text-gray-600 bg-gray-100':
+                    selectedCustomer.status === 'Inactive',
+                  'text-red-600 bg-red-100':
+                    selectedCustomer.status === 'Banned'
+                }"
+              >
+                {{ selectedCustomer.status }}
+              </span>
+              <button
+                (click)="startEditingCustomerStatus()"
+                class="ml-2 text-gray-500 hover:text-gray-700"
+              >
+                <i class="fa-solid fa-edit"></i>
+              </button>
+            </div>
+            <div *ngIf="editingCustomerStatus" class="flex items-center gap-2">
+              <select
+                [(ngModel)]="newCustomerStatus"
+                class="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-[#703232]"
+              >
+                <option
+                  *ngFor="let status of customerStatusOptions"
+                  [value]="status"
+                >
+                  {{ status }}
+                </option>
+              </select>
+              <button
+                (click)="saveCustomerStatus()"
+                class="px-3 py-1 bg-gradient-to-r from-[#703232] to-[#a14b4b] text-white rounded hover:from-[#a14b4b] hover:to-[#703232]"
+              >
+                Save
+              </button>
+              <button
+                (click)="cancelEditingCustomerStatus()"
+                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+          <div *ngIf="errorMessageCutomers" class="text-red-600 text-sm mb-4">
+            {{ errorMessageCutomers }}
+          </div>
+          <div *ngIf="successMessage" class="text-green-600 text-sm mb-4">
+            {{ successMessage }}
+          </div>
+          <div class="flex justify-end">
+            <button
+              (click)="cancelCustomerEdit()"
+              class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Merchants Section -->
+    <div *ngIf="currentSection === 'merchants'" class="animate-fade-in">
+      <h1 class="text-3xl font-bold mb-4 text-gray-800 tracking-tight">
+        All Merchants
+      </h1>
+      <div *ngIf="paginatedMerchants.length === 0" class="text-center py-12">
+        <i class="fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"></i>
+        <p class="text-xl font-semibold text-gray-600">No merchants found</p>
+      </div>
+      <div class="bg-white rounded-lg shadow-sm">
+        <!-- Table Header -->
+        <div
+          class="grid grid-cols-5 gap-4 p-4 border-b font-semibold text-gray-700"
+        >
+          <div>Name</div>
+          <div>Hire Age</div>
+          <div>Feedback</div>
+          <div>Status</div>
+          <div>Gaining Money (Delivered)</div>
+        </div>
+        <!-- Table Rows -->
+        <div
+          *ngFor="let merchant of paginatedMerchants"
+          (click)="selectMerchant(merchant)"
+          class="grid grid-cols-5 gap-4 p-4 border-b hover:bg-gray-50 cursor-pointer"
+        >
+          <div class="flex items-center">
+            <span
+              class="text-gray-800 truncate"
+              [title]="merchant.merchantName"
+            >
+              {{ merchant.merchantName }}
+            </span>
+          </div>
+          <div class="flex items-center">
+            <span class="text-gray-600">{{ merchant.hireAge }}</span>
+          </div>
+          <div class="flex items-center">
+            <ng-container *ngFor="let star of [1, 2, 3, 4, 5]; let i = index">
+              <i
+                class="fa-solid text-yellow-500"
+                [ngClass]="{
+                  'fa-star': (merchant.feedback || 0) >= i + 1,
+                  'fa-star-half-alt':
+                    (merchant.feedback || 0) >= i + 0.5 &&
+                    (merchant.feedback || 0) < i + 1,
+                  'fa-star-o': (merchant.feedback || 0) < i + 0.5
+                }"
+              ></i>
+            </ng-container>
+            <span class="text-sm text-gray-600 ml-2">
+              ({{ merchant.feedback || 0 }})
+            </span>
+          </div>
+          <div class="flex items-center">
+            <span
+              class="px-2 py-1 rounded text-sm font-medium"
+              [ngClass]="{
+                'text-green-600 bg-green-100': merchant.status === 'Active',
+                'text-red-600 bg-red-100': merchant.status === 'Inactive'
+              }"
+            >
+              {{ merchant.status }}
+            </span>
+          </div>
+          <div class="flex items-center">
+            <span class="text-gray-600">
+              ${{
+                calculateMerchantEarnings(merchant.merchantId)
+                  | number : "1.2-2"
+              }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <!-- Merchants Pagination -->
+      <div
+        class="flex justify-center mt-6"
+        *ngIf="paginatedMerchants.length !== 0"
+      >
+        <nav class="inline-flex rounded-lg">
+          <button
+            [disabled]="currentMerchantsPage === 1"
+            (click)="changeMerchantsPage(currentMerchantsPage - 1)"
+            class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button
+            *ngFor="let page of getMerchantsPageNumbers()"
+            (click)="changeMerchantsPage(page)"
+            class="px-3 py-1 cursor-pointer"
+            [ngClass]="{
+              'bg-[var(--main-color)] text-white border-[var(--main-color)] rounded-full w-10 h-10 flex items-center justify-center':
+                currentMerchantsPage === page,
+              '': currentMerchantsPage !== page
+            }"
+          >
+            {{ page }}
+          </button>
+          <button
+            [disabled]="currentMerchantsPage === totalMerchantsPages"
+            (click)="changeMerchantsPage(currentMerchantsPage + 1)"
+            class="px-4 py-2 cursor-pointer bg-transparent disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </nav>
+      </div>
+      <div
+        *ngIf="selectedMerchant"
+        class="fixed backdrop-blur-xs inset-0 flex items-center justify-center z-50 animate-scale-in"
+      >
+        <div
+          class="relative bg-white rounded-lg p-6 w-full max-w-md shadow-2xl transform transition-all"
+        >
+          <h2 class="text-2xl font-semibold mb-4">
+            Merchant ID: {{ selectedMerchant.merchantId }}
+          </h2>
+          <p class="text-gray-700">Name: {{ selectedMerchant.merchantName }}</p>
+          <p class="text-gray-700">Hire Age: {{ selectedMerchant.hireAge }}</p>
+          <p class="text-gray-700">
+            Feedback: {{ selectedMerchant.feedback || 0 }}
+          </p>
+          <p class="text-gray-700">
+            Gaining Money (Delivered Orders): ${{
+              calculateMerchantEarnings(selectedMerchant.merchantId)
+                | number : "1.2-2"
+            }}
+          </p>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Update Status
+            </label>
+            <select
+              [(ngModel)]="selectedMerchant.status"
+              (change)="updateMerchantStatus(selectedMerchant)"
+              class="w-full p-2 border rounded text-sm"
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="flex justify-end mt-4">
+            <button
+              (click)="selectedMerchant = null"
+              class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery Reps Section (Done) -->
+    <div *ngIf="currentSection === 'delivery'" class="animate-fade-in">
+      <h1 class="text-3xl font-bold mb-4 text-gray-800 tracking-tight">
+        All Delivery
+      </h1>
+      <button
+        (click)="showAddForm = !showAddForm"
+        class="mb-4 px-4 py-2 bg-[var(--main-color)] text-white rounded hover:bg-opacity-90"
+      >
+        {{ showAddForm ? "Cancel" : "Add Delivery" }}
+      </button>
+      <div *ngIf="showAddForm" class="mb-4 p-4 border rounded-lg bg-white">
+        <h2 class="text-xl font-semibold mb-4">Add New Delivery</h2>
+        <form [formGroup]="deliveryForm" (ngSubmit)="addDeliveryRep()">
+          <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div>
+              <input
+                formControlName="userName"
+                class="w-full p-2 border rounded text-sm"
+                type="text"
+                placeholder="Enter username"
+                [ngClass]="{
+                  'border-red-500':
+                    deliveryForm.get('userName')?.invalid &&
+                    deliveryForm.get('userName')?.touched
+                }"
+              />
+              <p
+                *ngIf="
+                  deliveryForm.get('userName')?.invalid &&
+                  deliveryForm.get('userName')?.touched
+                "
+                class="text-red-500 text-sm mt-1"
+              >
+                Username is required and must contain only letters and numbers,
+                no spaces or special characters
+              </p>
+            </div>
+            <div>
+              <input
+                formControlName="email"
+                class="w-full p-2 border rounded text-sm"
+                type="email"
+                placeholder="Enter email"
+                [ngClass]="{
+                  'border-red-500':
+                    deliveryForm.get('email')?.invalid &&
+                    deliveryForm.get('email')?.touched
+                }"
+              />
+              <p
+                *ngIf="
+                  deliveryForm.get('email')?.invalid &&
+                  deliveryForm.get('email')?.touched
+                "
+                class="text-red-500 text-sm mt-1"
+              >
+                Email is required and Enter a valid email
+              </p>
+            </div>
+            <div>
+              <input
+                formControlName="password"
+                class="w-full p-2 border rounded text-sm"
+                type="password"
+                placeholder="Enter password"
+                [ngClass]="{
+                  'border-red-500':
+                    deliveryForm.get('password')?.invalid &&
+                    deliveryForm.get('password')?.touched
+                }"
+              />
+              <p
+                *ngIf="
+                  deliveryForm.get('password')?.invalid &&
+                  deliveryForm.get('password')?.touched
+                "
+                class="text-red-500 text-sm mt-1"
+              >
+                Password is required and must be At least 8 characters, one
+                uppercase, one lowercase, one number, and one special character
+              </p>
+            </div>
+            <div>
+              <input
+                formControlName="phone"
+                class="w-full p-2 border rounded text-sm"
+                type="text"
+                placeholder="Enter phone"
+                [ngClass]="{
+                  'border-red-500':
+                    deliveryForm.get('phone')?.invalid &&
+                    deliveryForm.get('phone')?.touched
+                }"
+              />
+              <p
+                *ngIf="
+                  deliveryForm.get('phone')?.invalid &&
+                  deliveryForm.get('phone')?.touched
+                "
+                class="text-red-500 text-sm mt-1"
+              >
+                Phone is required and enter a Valid phone number.
+              </p>
+            </div>
+            <div>
+              <input
+                formControlName="state"
+                class="w-full p-2 border rounded text-sm"
+                type="text"
+                placeholder="Enter state"
+                [ngClass]="{
+                  'border-red-500':
+                    deliveryForm.get('state')?.invalid &&
+                    deliveryForm.get('state')?.touched
+                }"
+              />
+              <p
+                *ngIf="
+                  deliveryForm.get('state')?.invalid &&
+                  deliveryForm.get('state')?.touched
+                "
+                class="text-red-500 text-sm mt-1"
+              >
+                State is required.
+              </p>
+            </div>
+            <div>
+              <input
+                formControlName="governorate"
+                class="w-full p-2 border rounded text-sm"
+                type="text"
+                placeholder="Enter governorate"
+                [ngClass]="{
+                  'border-red-500':
+                    deliveryForm.get('governorate')?.invalid &&
+                    deliveryForm.get('governorate')?.touched
+                }"
+              />
+              <p
+                *ngIf="
+                  deliveryForm.get('governorate')?.invalid &&
+                  deliveryForm.get('governorate')?.touched
+                "
+                class="text-red-500 text-sm mt-1"
+              >
+                Governorate is required.
+              </p>
+            </div>
+            <div>
+              <input
+                formControlName="location"
+                class="w-full p-2 border rounded text-sm"
+                type="text"
+                placeholder="Enter location"
+                [ngClass]="{
+                  'border-red-500':
+                    deliveryForm.get('location')?.invalid &&
+                    deliveryForm.get('location')?.touched
+                }"
+              />
+              <p
+                *ngIf="
+                  deliveryForm.get('location')?.invalid &&
+                  deliveryForm.get('location')?.touched
+                "
+                class="text-red-500 text-sm mt-1"
+              >
+                Location is required.
+              </p>
+            </div>
+            <div>
+              <select
+                formControlName="gender"
+                class="w-full p-2 border rounded text-sm"
+                [ngClass]="{
+                  'border-red-500':
+                    deliveryForm.get('gender')?.invalid &&
+                    deliveryForm.get('gender')?.touched
+                }"
+                name="Gender"
+                title="Gender"
+              >
+                <option value="" disabled selected hidden>Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+              <p
+                *ngIf="
+                  deliveryForm.get('gender')?.invalid &&
+                  deliveryForm.get('gender')?.touched
+                "
+                class="text-red-500 text-sm mt-1"
+              >
+                Gender is required.
+              </p>
+            </div>
+            <div>
+              <input
+                formControlName="birthDate"
+                class="w-full p-2 border rounded text-sm"
+                type="date"
+                [ngClass]="{
+                  'border-red-500':
+                    deliveryForm.get('birthDate')?.invalid &&
+                    deliveryForm.get('birthDate')?.touched
+                }"
+              />
+              <p
+                *ngIf="
+                  deliveryForm.get('birthDate')?.invalid &&
+                  deliveryForm.get('birthDate')?.touched
+                "
+                class="text-red-500 text-sm mt-1"
+              >
+                Birth date is required.
+              </p>
+            </div>
+            <div>
+              <input
+                formControlName="nationalId"
+                class="w-full p-2 border rounded text-sm"
+                type="text"
+                placeholder="Enter national ID"
+                [ngClass]="{
+                  'border-red-500':
+                    deliveryForm.get('nationalId')?.invalid &&
+                    deliveryForm.get('nationalId')?.touched
+                }"
+              />
+              <p
+                *ngIf="
+                  deliveryForm.get('nationalId')?.invalid &&
+                  deliveryForm.get('nationalId')?.touched
+                "
+                class="text-red-500 text-sm mt-1"
+              >
+                National ID must be 14 digits.
+              </p>
+            </div>
+            <div class="sm:col-span-4 flex justify-end">
+              <button
+                type="submit"
+                class="px-4 py-2 bg-[var(--main-color)] text-white rounded hover:bg-opacity-90"
+                [disabled]="deliveryForm.invalid"
+              >
+                Add Delivery
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div
+        *ngIf="paginatedDeliveryReps.length === 0 && !loading"
+        class="text-center py-12"
+      >
+        <i class="fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"></i>
+        <p class="text-xl font-semibold text-gray-600">No delivery found</p>
+      </div>
+      <div *ngIf="loading" class="text-center py-12">
+        <i class="fa-solid fa-spinner text-4xl text-gray-400 animate-spin"></i>
+        <p class="text-xl font-semibold text-gray-600">Loading...</p>
+      </div>
+      <div class="grid gap-4" *ngIf="!showAddForm && !loading">
+        <div
+          *ngFor="let delivery of paginatedDeliveryReps"
+          (click)="selectDeliveryRep(delivery)"
+          class="p-4 border rounded-lg cursor-pointer bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+        >
+          <div class="flex justify-between">
+            <div>
+              <h3 class="font-semibold text-lg text-gray-800">
+                {{ delivery.name }}
+              </h3>
+              <p class="text-sm text-gray-500">ID: {{ delivery.id }}</p>
+              <p class="text-sm text-gray-500">
+                Orders Delivered: {{ delivery.deliveredOrdersCount }}
+              </p>
+            </div>
+            <div class="text-right">
+              <span
+                class="px-2 py-1 rounded text-sm font-medium"
+                [ngClass]="{
+                  'text-green-600 bg-green-100': delivery.status === 'Active',
+                  'text-gray-600 bg-gray-100': delivery.status === 'Inactive'
+                }"
+              >
+                {{ delivery.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Delivery Reps Pagination -->
+      <div
+        class="flex justify-center mt-6"
+        *ngIf="paginatedDeliveryReps.length !== 0 && !showAddForm && !loading"
+      >
+        <nav class="inline-flex rounded-lg">
+          <button
+            [disabled]="currentDeliveryRepsPage === 1"
+            (click)="changeDeliveryRepsPage(currentDeliveryRepsPage - 1)"
+            class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button
+            *ngFor="let page of getDeliveryRepsPageNumbers()"
+            (click)="changeDeliveryRepsPage(page)"
+            class="px-3 py-1 cursor-pointer"
+            [ngClass]="{
+              'bg-[var(--main-color)] text-white border-[var(--main-color)] rounded-full w-10 h-10 flex items-center justify-center':
+                currentDeliveryRepsPage === page,
+              '': currentDeliveryRepsPage !== page
+            }"
+          >
+            {{ page }}
+          </button>
+          <button
+            [disabled]="currentDeliveryRepsPage === totalDeliveryRepsPages"
+            (click)="changeDeliveryRepsPage(currentDeliveryRepsPage + 1)"
+            class="px-4 py-2 cursor-pointer bg-transparent disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </nav>
+      </div>
+      <div
+        *ngIf="selectedDeliveryRep"
+        class="fixed backdrop-blur-xs inset-0 flex items-center justify-center z-50 animate-scale-in"
+      >
+        <div
+          class="relative bg-white rounded-lg p-6 w-full max-w-md shadow-2xl transform transition-all"
+        >
+          <h2 class="text-2xl font-semibold mb-4">
+            Delivery Rep ID: {{ selectedDeliveryRep.id }}
+          </h2>
+          <p class="text-gray-700">Name: {{ selectedDeliveryRep.name }}</p>
+          <p class="text-gray-700">
+            Hire Age: {{ selectedDeliveryRep.hireAge }}
+          </p>
+          <p class="text-gray-700">
+            Orders Delivered: {{ selectedDeliveryRep.deliveredOrdersCount }}
+          </p>
+          <p class="text-gray-700" *ngIf="selectedDeliveryRep.createdByAdmin">
+            Created By: {{ selectedDeliveryRep.createdByAdmin }}
+          </p>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Update Status</label
+            >
+            <select
+              [(ngModel)]="selectedDeliveryRep.status"
+              (change)="updateDeliveryRepStatus(selectedDeliveryRep)"
+              class="w-full p-2 border rounded text-sm"
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="flex justify-between mt-4">
+            <button
+              (click)="selectedDeliveryRep = null"
+              class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Section -->
+    <div
+      *ngIf="currentSection === 'products'"
+      class="flex flex-col gap-6 animate-fade-in"
+      [ngClass]="{ 'backdrop-blur-sm': selectedProduct }"
+    >
+      <!-- Filters -->
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <!-- Category Filter (Disabled, as category isn't in Product interface) -->
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Filter by Category</label
+            >
+            <select
+              [(ngModel)]="categoryFilter"
+              disabled
+              class="w-full p-2 border rounded text-sm bg-gray-100 cursor-not-allowed"
+            >
+              <option value="">All Categories</option>
+              <option value="electronics">Electronics</option>
+              <option value="clothing">Clothing</option>
+              <option value="accessories">Accessories</option>
+            </select>
+          </div>
+
+          <!-- Search by Product ID -->
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Search by Product ID</label
+            >
+            <input
+              [(ngModel)]="productIdFilter"
+              (input)="filterProducts()"
+              type="text"
+              placeholder="Enter product ID (e.g., 1 or #1)"
+              class="w-full p-2 border rounded text-sm"
+            />
+          </div>
+
+          <!-- Sort By -->
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Sort By</label
+            >
+            <select
+              [(ngModel)]="sortBy"
+              (change)="filterProducts()"
+              class="w-full p-2 border rounded text-sm"
+            >
+              <option value="title-asc">A-Z</option>
+              <option value="title-desc">Z-A</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <!-- Product Rows -->
+      <div class="flex-1">
+        <div class="bg-white rounded-lg shadow-sm">
+          <!-- Table Header -->
+          <div
+            *ngIf="!loading"
+            class="grid grid-cols-4 gap-4 p-4 border-b font-semibold text-gray-700"
+          >
+            <div>Image</div>
+            <div>Title</div>
+            <div>Feedback</div>
+            <div>Status</div>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="loading" class="text-center py-12">
+            <i
+              class="fa-solid fa-spinner fa-spin text-4xl text-gray-400 mb-4"
+            ></i>
+            <p class="text-xl font-semibold text-gray-600">
+              Loading products...
+            </p>
+          </div>
+
+          <!-- No Products Found -->
+          <div
+            *ngIf="!loading && paginatedProducts.length === 0"
+            class="text-center py-12"
+          >
+            <i
+              class="fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"
+            ></i>
+            <p class="text-xl font-semibold text-gray-600">No products found</p>
+          </div>
+
+          <!-- Table Rows -->
+          <div *ngIf="!loading">
+            <div
+              *ngFor="
+                let product of paginatedProducts;
+                trackBy: trackByProductId
+              "
+              class="grid grid-cols-4 gap-4 p-4 border-b hover:bg-gray-50 cursor-pointer"
+              (click)="selectProduct(product)"
+            >
+              <div>
+                <img
+                  class="w-16 h-16 object-cover rounded"
+                  [src]="
+                    product.image ||
+                    'https://via.placeholder.com/300x300?text=300+x+300'
+                  "
+                  [alt]="product.title"
+                />
+              </div>
+              <div class="flex items-center">
+                <span class="text-gray-800 truncate" [title]="product.title">
+                  {{ product.title }}
+                </span>
+              </div>
+              <div class="flex items-center">
+                <span class="text-gray-600">
+                  {{ product.feedback }}
+                </span>
+              </div>
+              <div class="flex items-center">
+                <span
+                  [ngClass]="{
+                    'text-green-600': product.status === 'Active',
+                    'text-red-600': product.status === 'Banned',
+                    'text-yellow-600': product.status === 'OutOfStock',
+                    'text-gray-600': product.status === 'Pending'
+                  }"
+                >
+                  {{
+                    product.status === "OutOfStock"
+                      ? "Out of Stock"
+                      : product.status === "Active"
+                      ? "Active"
+                      : product.status === "Banned"
+                      ? "Banned"
+                      : "Pending"
+                  }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Pagination -->
+        <div
+          class="flex justify-center mt-6"
+          *ngIf="!loading && paginatedProducts.length !== 0"
+        >
+          <nav class="inline-flex rounded-lg">
+            <button
+              [disabled]="currentPage === 1"
+              (click)="changePage(currentPage - 1)"
+              class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button
+              *ngFor="let page of pageNumbers"
+              (click)="changePage(page)"
+              class="px-3 py-1 cursor-pointer"
+              [ngClass]="{
+                'bg-[var(--main-color)] text-white border-[var(--main-color)] rounded-full w-10 h-10 flex items-center justify-center':
+                  currentPage === page,
+                '': currentPage !== page
+              }"
+            >
+              {{ page }}
+            </button>
+            <button
+              [disabled]="currentPage === totalPages"
+              (click)="changePage(currentPage + 1)"
+              class="px-4 py-2 cursor-pointer bg-transparent disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </nav>
+        </div>
+        <!-- Product Details Overlay -->
+        <div
+          *ngIf="selectedProduct"
+          class="fixed backdrop-blur-xs inset-0 flex items-center justify-center z-50 animate-scale-in"
+        >
+          <div
+            class="relative bg-white rounded-lg p-6 w-full max-w-md shadow-2xl transform transition-all"
+          >
+            <div class="mb-4">
+              <img
+                [src]="
+                  selectedProduct.image ||
+                  'https://via.placeholder.com/300x300?text=300+x+300'
+                "
+                [alt]="selectedProduct.title"
+                class="w-full h-[200px] object-cover rounded-lg mb-4"
+              />
+              <h2 class="text-2xl font-semibold mb-2">
+                #{{ selectedProduct.id }} - {{ selectedProduct.title }}
+              </h2>
+              <p class="text-sm text-gray-600 mb-2">
+                Feedback: {{ selectedProduct.feedback }}
+              </p>
+              <p class="text-sm text-gray-600">
+                Quantity: {{ selectedProduct.quantity }}
+              </p>
+              <p class="text-sm text-gray-600">
+                Merchant: {{ selectedProduct.merchantName }} (ID:
+                {{ selectedProduct.merchantId }})
+              </p>
+              <p
+                class="text-sm"
+                [ngClass]="{
+                  'text-green-600': selectedProduct.status === 'Active',
+                  'text-yellow-600': selectedProduct.status === 'OutOfStock',
+                  'text-red-600': selectedProduct.status === 'Banned',
+                  'text-gray-600': selectedProduct.status === 'Pending'
+                }"
+              >
+                Current Status:
+                {{
+                  selectedProduct.status === "OutOfStock"
+                    ? "Out of Stock"
+                    : selectedProduct.status === "Active"
+                    ? "Active"
+                    : selectedProduct.status === "Banned"
+                    ? "Banned"
+                    : "Pending"
+                }}
+              </p>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Update Status</label
+              >
+              <select
+                [(ngModel)]="selectedProduct.status"
+                class="w-full p-2 border rounded text-sm"
+              >
+                <option
+                  *ngFor="
+                    let status of getValidStatusOptions(selectedProduct.status)
+                  "
+                  [value]="status"
+                >
+                  {{
+                    status === "OutOfStock"
+                      ? "Out of Stock"
+                      : status === "Active"
+                      ? "Active"
+                      : "Banned"
+                  }}
+                </option>
+              </select>
+            </div>
+            <div class="flex justify-end gap-4">
+              <button
+                (click)="closeProductModal()"
+                class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                (click)="saveProductStatus()"
+                class="px-4 py-2 bg-[var(--main-color)] text-white rounded hover:bg-opacity-90"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Section -->
+    <div *ngIf="currentSection === 'orders'">
+      <!-- Orders List -->
+      <div *ngIf="!selectedOrder" class="animate-fade-in">
+        <h2
+          class="text-4xl font-extrabold text-gray-900 bg-clip-text text-transparent bg-gradient-to-r from-[#703232] to-[#a14b4b] text-center mb-6"
+        >
+          All Orders
+        </h2>
+        <!-- Loading State -->
+        <div *ngIf="loading" class="text-center py-12">
+          <i
+            class="fa-solid fa-spinner fa-spin text-4xl text-[#a14b4b] mb-4"
+          ></i>
+          <p class="text-xl font-semibold text-gray-600">Loading orders...</p>
+        </div>
+        <!-- No Orders Found -->
+        <div
+          *ngIf="
+            !loading &&
+            errorMessageOrders === 'No orders found' &&
+            paginatedOrders.length === 0
+          "
+          class="text-center py-12"
+        >
+          <i
+            class="fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"
+          ></i>
+          <p class="text-xl font-semibold text-gray-600">No orders found</p>
+        </div>
+        <!-- Error Message -->
+        <div
+          *ngIf="
+            !loading &&
+            errorMessageOrders &&
+            errorMessageOrders !== 'No orders found'
+          "
+          class="mt-2 text-sm text-red-500 bg-red-100 rounded-xl p-4 flex items-center justify-center"
+        >
+          <span class="inline-block w-4">✘</span>
+          <span class="ml-2">{{ errorMessageOrders }}</span>
+        </div>
+        <!-- Orders List -->
+        <div *ngIf="!loading && paginatedOrders.length > 0" class="grid gap-4">
+          <div
+            *ngFor="let order of paginatedOrders"
+            (click)="selectOrder(order)"
+            class="p-4 border rounded-xl cursor-pointer bg-white/50 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+          >
+            <div class="flex justify-between">
+              <div>
+                <h3 class="font-semibold text-lg text-gray-800">
+                  {{ order.userName }}
+                </h3>
+                <p class="text-sm text-gray-500">{{ order.address }}</p>
+                <p class="text-sm text-gray-500">Order #{{ order.id }}</p>
+              </div>
+              <div class="text-right">
+                <span
+                  class="px-2 py-1 rounded text-sm font-medium"
+                  [ngClass]="{
+                    'bg-yellow-100 text-yellow-800': order.status === 'Pending',
+                    'bg-orange-100 text-orange-800':
+                      order.status === 'Preparing',
+                    'bg-green-100 text-green-800': order.status === 'Recieved',
+                    'bg-blue-100 text-blue-800': order.status === 'OnWay'
+                  }"
+                >
+                  {{ order.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Pagination -->
+        <div
+          class="flex justify-center mt-6"
+          *ngIf="!loading && paginatedOrders.length > 0"
+        >
+          <nav class="inline-flex rounded-lg">
+            <button
+              [disabled]="currentOrdersPage === 1"
+              (click)="changeOrdersPage(currentOrdersPage - 1)"
+              class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400 text-gray-600 hover:text-[#703232] transition-colors"
+            >
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button
+              *ngFor="let page of getOrdersPageNumbers()"
+              (click)="changeOrdersPage(page)"
+              class="px-3 py-1 cursor-pointer"
+              [ngClass]="{
+                'bg-gradient-to-r from-[#703232] to-[#a14b4b] text-white rounded-full w-10 h-10 flex items-center justify-center':
+                  currentOrdersPage === page,
+                'text-gray-600 hover:text-[#703232]': currentOrdersPage !== page
+              }"
+            >
+              {{ page }}
+            </button>
+            <button
+              [disabled]="currentOrdersPage === totalOrdersPages"
+              (click)="changeOrdersPage(currentOrdersPage + 1)"
+              class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400 text-gray-600 hover:text-[#703232] transition-colors"
+            >
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Order Details Modal -->
+      <div
+        *ngIf="selectedOrder"
+        class="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm animate-scale-in"
+      >
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <div class="flex justify-between items-center mb-4">
+            <h2
+              class="text-2xl font-bold text-gray-900 bg-clip-text text-transparent bg-gradient-to-r from-[#703232] to-[#a14b4b]"
+            >
+              Order #{{ selectedOrder.id }}
+            </h2>
+            <button
+              (click)="cancelOrderEdit()"
+              class="text-gray-500 hover:text-[#703232]"
+            >
+              <i class="fa-solid fa-times text-xl"></i>
+            </button>
+          </div>
+          <!-- Success Message -->
+          <div
+            *ngIf="successMessage"
+            class="mt-2 text-sm text-green-500 bg-green-100 rounded-xl p-4 flex items-center"
+          >
+            <span class="inline-block w-4">✓</span>
+            <span class="ml-2">{{ successMessage }}</span>
+          </div>
+          <!-- Error Message -->
+          <div
+            *ngIf="errorMessageOrders"
+            class="mt-2 text-sm text-red-500 bg-red-100 rounded-xl p-4 flex items-center"
+          >
+            <span class="inline-block w-4">✘</span>
+            <span class="ml-2">{{ errorMessageOrders }}</span>
+          </div>
+          <div class="">
+            <div>
+              <h3 class="font-semibold text-lg text-gray-800 mb-2">
+                Customer Details
+              </h3>
+              <p class="text-gray-700">
+                <span class="font-medium">Name:</span>
+                {{ selectedOrder.userName }}
+              </p>
+              <div class="flex items-center gap-2">
+                <p class="text-gray-700">
+                  <span class="font-medium">Address:</span>
+                  <span *ngIf="!editingAddress">{{
+                    selectedOrder.address
+                  }}</span>
+                </p>
+                <button
+                  *ngIf="!editingAddress"
+                  (click)="startEditingAddress()"
+                  class="text-[#703232] hover:text-[#5b2929]"
+                >
+                  <i class="fa-solid fa-edit"></i>
+                </button>
+              </div>
+              <div *ngIf="editingAddress" class="mt-2">
+                <input
+                  [(ngModel)]="newAddress"
+                  type="text"
+                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#703232]"
+                  placeholder="Enter new address"
+                />
+                <div class="flex gap-2 mt-2">
+                  <button
+                    (click)="saveAddress()"
+                    class="px-4 py-2 bg-gradient-to-r from-[#703232] to-[#a14b4b] text-white rounded-lg hover:from-[#5b2929] hover:to-[#8c4040] transition-colors"
+                  >
+                    Save
+                  </button>
+                  <button
+                    (click)="cancelEditingAddress()"
+                    class="px-4 py-2 bg-gray-200 rounded-lg text-gray-800 hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <p class="text-gray-700">
+                  <span class="font-medium">Phone:</span>
+                  <span *ngIf="!editingPhone">{{ selectedOrder.phone }}</span>
+                </p>
+                <button
+                  *ngIf="!editingPhone"
+                  (click)="startEditingPhone()"
+                  class="text-[#703232] hover:text-[#5b2929]"
+                >
+                  <i class="fa-solid fa-edit"></i>
+                </button>
+              </div>
+              <div *ngIf="editingPhone" class="mt-2">
+                <input
+                  [(ngModel)]="newPhone"
+                  type="text"
+                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#703232]"
+                  placeholder="Enter new phone number"
+                />
+                <div class="flex gap-2 mt-2">
+                  <button
+                    (click)="savePhone()"
+                    class="px-4 py-2 bg-gradient-to-r from-[#703232] to-[#a14b4b] text-white rounded-lg hover:from-[#5b2929] hover:to-[#8c4040] transition-colors"
+                  >
+                    Save
+                  </button>
+                  <button
+                    (click)="cancelEditingPhone()"
+                    class="px-4 py-2 bg-gray-200 rounded-lg text-gray-800 hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+              <p class="text-gray-700">
+                <span class="font-medium">Delivery:</span>
+                {{ selectedOrder.deliveryName }} (ID:
+                {{ selectedOrder.deliveryId }})
+              </p>
+              <div class="flex items-center gap-2 mt-2">
+                <span class="font-medium text-gray-700">Status:</span>
+                <span
+                  *ngIf="!editingStatus"
+                  class="px-2 py-1 rounded text-sm font-medium"
+                  [ngClass]="{
+                    'bg-yellow-100 text-yellow-800':
+                      selectedOrder.status === 'Pending',
+                    'bg-orange-100 text-orange-800':
+                      selectedOrder.status === 'Preparing',
+                    'bg-green-100 text-green-800':
+                      selectedOrder.status === 'Recieved',
+                    'bg-blue-100 text-blue-800':
+                      selectedOrder.status === 'OnWay'
+                  }"
+                >
+                  {{ selectedOrder.status }}
+                </span>
+                <button
+                  *ngIf="!editingStatus"
+                  (click)="startEditingStatus()"
+                  class="text-[#703232] hover:text-[#5b2929]"
+                >
+                  <i class="fa-solid fa-edit"></i>
+                </button>
+              </div>
+              <div *ngIf="editingStatus" class="mt-2">
+                <select
+                  [(ngModel)]="newStatus"
+                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#703232]"
+                >
+                  <option *ngFor="let status of statusOptions" [value]="status">
+                    {{ status }}
+                  </option>
+                </select>
+                <div class="flex gap-2 mt-2">
+                  <button
+                    (click)="saveStatus()"
+                    class="px-4 py-2 bg-gradient-to-r from-[#703232] to-[#a14b4b] text-white rounded-lg hover:from-[#5b2929] hover:to-[#8c4040] transition-colors"
+                  >
+                    Save
+                  </button>
+                  <button
+                    (click)="cancelEditingStatus()"
+                    class="px-4 py-2 bg-gray-200 rounded-lg text-gray-800 hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="selectedOrderDetails">
+              <h3 class="font-semibold text-lg text-gray-800 mb-2">
+                Order Items
+              </h3>
+              <ul class="list-disc pl-5 text-gray-700">
+                <li
+                  *ngFor="
+                    let productName of selectedOrderDetails.productsName;
+                    let i = index
+                  "
+                >
+                  {{ productName }} x {{ selectedOrderDetails.quantity[i] }}
+                </li>
+                <li *ngIf="selectedOrderDetails.productsName.length === 0">
+                  No items found for this order.
+                </li>
+              </ul>
+              <p class="text-gray-700 font-medium mt-2">
+                Total Price: ${{
+                  selectedOrderDetails.totalPrice | number : "1.2-2"
+                }}
+              </p>
+            </div>
+          </div>
+          <div class="flex justify-end mt-6">
+            <button
+              (click)="cancelOrderEdit()"
+              class="px-4 py-2 bg-gray-200 rounded-lg text-gray-800 hover:bg-gray-300 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

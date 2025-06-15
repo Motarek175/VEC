@@ -1,0 +1,1214 @@
+<div class="flex flex-col md:flex-row min-h-screen">
+  <!-- Sidebar -->
+  <div class="relative">
+    <aside
+      class="w-full md:w-72 bg-[var(--main-color)] text-white flex flex-col md:min-h-full shadow-lg"
+    >
+      <!-- Main navigation section -->
+      <div class="p-4 md:pb-0 flex-grow overflow-y-auto">
+        <h2 class="text-2xl p-2 font-bold mb-6 tracking-tight">
+          Merchant Dashboard
+        </h2>
+        <nav>
+          <ul>
+            <!-- Home -->
+            <li>
+              <a
+                (click)="setView('home'); sidebarOpen = false"
+                class="block p-3 rounded-lg cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md text-lg"
+                [class.bg-gray-500]="view === 'home'"
+              >
+                <i class="fa-solid fa-home mr-2"></i> Home
+              </a>
+            </li>
+            <!-- Products -->
+            <li>
+              <a
+                (click)="setView('products'); sidebarOpen = false"
+                class="block p-3 rounded-lg cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md text-lg"
+                [class.bg-gray-500]="view === 'products'"
+              >
+                <i class="fa-solid fa-box mr-2"></i> All Products
+              </a>
+            </li>
+            <!-- Add Product -->
+            <li>
+              <a
+                (click)="setView('add-product'); sidebarOpen = false"
+                class="block p-3 rounded-lg cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md text-lg"
+                [class.bg-gray-500]="view === 'add-product'"
+              >
+                <i class="fa-solid fa-plus mr-2"></i> Add Product
+              </a>
+            </li>
+            <!-- Orders -->
+            <li>
+              <a
+                (click)="setView('orders'); sidebarOpen = false"
+                class="block p-3 rounded-lg cursor-pointer transition-all duration-300 hover:bg-gray-600 hover:shadow-md text-lg"
+                [class.bg-gray-500]="view === 'orders'"
+              >
+                <i class="fa-solid fa-truck mr-2"></i> Orders
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Profile Section -->
+      <div
+        class="w-full block flex flex-col gap-3 px-4 py-4 bg-[var(--main-color)] mt-auto"
+      >
+        <div class="flex flex-row items-center justify-center">
+          <div
+            class="w-10 h-10 bg-white rounded-full flex flex-row items-center justify-center text-[var(--main-color)] font-bold text-xl"
+          >
+            {{ merchantPersonName[0] }}
+          </div>
+          <div class="flex flex-row items-center justify-between flex-1">
+            <div class="ml-3">
+              <p class="font-semibold text-lg">{{ merchantPersonName }}</p>
+              <p class="text-sm text-gray-300">{{ decodedToken.Role }}</p>
+            </div>
+            <div>
+              <a
+                (click)="_UserAuthService.logout()"
+                class="text-xl cursor-pointer hover:text-gray-300 transition-colors duration-200"
+              >
+                <i class="fa-solid fa-arrow-right-from-bracket text-2xl"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <!-- Main Content -->
+  <main class="flex-1 p-6">
+    <!-- Home Section -->
+    <div *ngIf="view === 'home'" class="px-4 animate-fade-in">
+      <h1 class="text-4xl font-bold mb-4 text-gray-800 tracking-tight">
+        Welcome {{ merchantPersonName }} to Merchant Dashboard
+      </h1>
+      <p class="text-gray-600 mb-6 leading-relaxed text-lg">
+        Showcase your products on our platform with ease. Here, you can add and
+        update your items, view incoming orders, and manage their status to
+        ensure a smooth and professional selling experience.
+      </p>
+      <img
+        src="./assets/welcome.jpg"
+        alt="Welcome"
+        class="mx-auto w-[400px] rounded-xl bg-transparent"
+      />
+    </div>
+
+    <!-- Products Section -->
+    <div *ngIf="view === 'products'" class="px-4 animate-fade-in">
+      <div class="flex-1">
+        <!-- Loading State -->
+        <div *ngIf="loading" class="text-center py-12">
+          <i
+            class="fa-solid fa-spinner fa-spin text-4xl text-gray-400 mb-4"
+          ></i>
+          <p class="text-xl font-semibold text-gray-600">Loading products...</p>
+        </div>
+
+        <!-- No Products Found -->
+        <div
+          *ngIf="!loading && paginatedProducts.length === 0"
+          class="text-center py-12"
+        >
+          <i
+            class="fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"
+          ></i>
+          <p class="text-xl font-semibold text-gray-600">No products found</p>
+        </div>
+
+        <!-- Product Cards -->
+        <div
+          *ngIf="!loading && paginatedProducts.length > 0"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          <div
+            *ngFor="let product of paginatedProducts; trackBy: trackByProductId"
+            class="bg-white rounded-xl shadow-md p-5 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+            (click)="loadProductDetails(product.id)"
+          >
+            <div class="relative overflow-hidden rounded-lg mb-4">
+              <img
+                class="w-full h-56 object-cover md:object-contain mx-auto transition-transform duration-300 group-hover:scale-105"
+                [src]="
+                  product.image ||
+                  'https://via.placeholder.com/300x300?text=300+x+300'
+                "
+                [alt]="product.title"
+              />
+            </div>
+            <h3
+              class="text-xl font-bold text-gray-900 truncate mb-3"
+              [title]="product.title"
+            >
+              {{ product.title }}
+            </h3>
+            <div class="flex flex-col gap-1 text-sm">
+              <p class="text-gray-600">
+                <strong class="font-semibold">Category:</strong>
+                <span class="text-gray-800 font-medium">{{
+                  product.categoryName || "N/A"
+                }}</span>
+              </p>
+              <p class="text-gray-600">
+                <strong class="font-semibold">Price:</strong>
+                <span class="text-gray-800 font-medium"
+                  >${{ product.sellPrice || "N/A" }}</span
+                >
+              </p>
+              <p class="text-gray-600">
+                <strong class="font-semibold">Quantity:</strong>
+                <span class="text-gray-800 font-medium">{{
+                  product.quantity || "N/A"
+                }}</span>
+              </p>
+              <p class="text-gray-600 flex items-center gap-2">
+                <strong class="font-semibold">Status:</strong>
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': product.status === 'Active',
+                    'bg-red-100 text-red-800': product.status === 'Banned',
+                    'bg-yellow-100 text-yellow-800':
+                      product.status === 'OutOfStock',
+                    'bg-gray-100 text-gray-800': product.status === 'Pending'
+                  }"
+                >
+                  <i
+                    class="mr-1"
+                    [ngClass]="{
+                      'fa-solid fa-check': product.status === 'Active',
+                      'fa-solid fa-ban': product.status === 'Banned',
+                      'fa-solid fa-exclamation-triangle':
+                        product.status === 'OutOfStock',
+                      'fa-solid fa-hourglass-half': product.status === 'Pending'
+                    }"
+                  ></i>
+                  {{
+                    product.status === "OutOfStock"
+                      ? "Out of Stock"
+                      : product.status
+                  }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          class="flex justify-center mt-6"
+          *ngIf="!loading && paginatedProducts.length !== 0"
+        >
+          <nav class="inline-flex rounded-lg bg-white">
+            <button
+              [disabled]="currentPage === 1"
+              (click)="changePage(currentPage - 1)"
+              class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400 transition-colors duration-200"
+            >
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button
+              *ngFor="let page of pageNumbers"
+              (click)="changePage(page)"
+              class="px-4 py-2 cursor-pointer"
+              [ngClass]="{
+                'bg-[var(--main-color)] text-white rounded-full':
+                  currentPage === page,
+                'hover:bg-transparent': currentPage !== page
+              }"
+            >
+              {{ page }}
+            </button>
+            <button
+              [disabled]="currentPage === totalPages"
+              (click)="changePage(currentPage + 1)"
+              class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400 transition-colors duration-200"
+            >
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Details View -->
+    <div
+      *ngIf="view === 'details' && selectedProduct"
+      class="p-8 bg-white rounded-xl shadow-lg animate-fade-in max-w-5xl mx-auto"
+    >
+      <!-- Error Message -->
+      <div
+        *ngIf="errorMessage"
+        class="p-4 bg-red-100 text-red-700 rounded-lg mb-6 animate-pulse flex items-center"
+      >
+        <i class="fa-solid fa-exclamation-circle mr-2"></i> {{ errorMessage }}
+      </div>
+
+      <!-- Back Button -->
+      <button
+        (click)="setView('products')"
+        class="mb-6 text-[var(--main-color)] hover:bg-[var(--main-color)] hover:text-white px-4 py-2 rounded-lg flex items-center cursor-pointer transition-all duration-300 shadow-sm"
+      >
+        <svg
+          class="w-5 h-5 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        Back to Products
+      </button>
+
+      <!-- Product Details -->
+      <h1 class="text-4xl font-bold mb-8 text-gray-800 tracking-tight">
+        {{ selectedProduct.title }}
+      </h1>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Image Section -->
+        <div
+          class="flex flex-col flex-col-reverse md:flex-row gap-4 items-center justify-center"
+        >
+          <!-- Variant Thumbnails (Vertical) -->
+          <div
+            class="flex flex-row md:flex-col gap-3"
+            *ngIf="productVariants && productVariants.length > 0"
+          >
+            <img
+              *ngFor="let variant of productVariants"
+              [src]="
+                variant.image ||
+                'https://via.placeholder.com/300x300?text=300+x+300'
+              "
+              [alt]="variant.productName"
+              class="w-20 h-20 object-cover rounded-lg cursor-pointer hover:scale-105 transition-transform duration-300 shadow-md"
+              (click)="selectVariant(variant)"
+              [ngClass]="{
+                'ring-2 ring-[var(--main-color)]':
+                  variant.id === selectedVariant?.id
+              }"
+            />
+          </div>
+          <!-- Main Image -->
+          <div class="flex-1">
+            <img
+              [src]="
+                selectedVariant?.image ||
+                selectedProduct.image ||
+                'https://via.placeholder.com/300x300?text=300+x+300'
+              "
+              [alt]="selectedProduct.title"
+              class="w-full object-contain rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl"
+            />
+          </div>
+        </div>
+        <!-- Product Info -->
+        <div class="md:col-span-1">
+          <h3 class="font-semibold text-2xl text-gray-800 mb-6">
+            Product Details
+          </h3>
+          <!-- All Details -->
+          <div class="text-gray-700">
+            <!-- Title -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Title:</strong>
+              <div class="flex-1">
+                <span *ngIf="!isEditingTitle" class="break-words">
+                  {{ selectedProduct.title || "No title" }}
+                </span>
+                <input
+                  *ngIf="isEditingTitle"
+                  [(ngModel)]="selectedProduct.title"
+                  type="text"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  placeholder="Enter product title"
+                  required
+                />
+              </div>
+              <button
+                *ngIf="!isEditingTitle"
+                (click)="toggleEditTitle()"
+                class="text-gray-500 hover:text-[var(--main-color)] transition-colors duration-200"
+                aria-label="Edit title"
+              >
+                <i class="fa-solid fa-pen"></i>
+              </button>
+            </div>
+            <!-- Description -->
+            <div class="flex items-start gap-3">
+              <strong class="w-28 font-semibold">Description:</strong>
+              <div class="flex-1">
+                <span *ngIf="!isEditingDescription" class="break-words">
+                  {{ selectedProduct.description || "No description" }}
+                </span>
+                <textarea
+                  *ngIf="isEditingDescription"
+                  [(ngModel)]="selectedProduct.description"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  placeholder="Enter product description"
+                  rows="4"
+                ></textarea>
+              </div>
+              <button
+                *ngIf="!isEditingDescription"
+                (click)="toggleEditDescription()"
+                class="text-gray-500 hover:text-[var(--main-color)] transition-colors duration-200"
+                aria-label="Edit description"
+              >
+                <i class="fa-solid fa-pen"></i>
+              </button>
+            </div>
+            <!-- Price -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Price ($):</strong>
+              <div class="flex-1">
+                <span *ngIf="!isEditingSellPrice">
+                  ${{ selectedProduct.sellPrice.toFixed(2) }}
+                </span>
+                <input
+                  *ngIf="isEditingSellPrice"
+                  [(ngModel)]="selectedProduct.sellPrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  placeholder="Enter price"
+                  required
+                />
+              </div>
+              <button
+                *ngIf="!isEditingSellPrice"
+                (click)="toggleEditSellPrice()"
+                class="text-gray-500 hover:text-[var(--main-color)] transition-colors duration-200"
+                aria-label="Edit price"
+              >
+                <i class="fa-solid fa-pen"></i>
+              </button>
+            </div>
+            <!-- Discount -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Discount (%):</strong>
+              <div class="flex-1">
+                <span *ngIf="!isEditingDiscount">
+                  {{
+                    selectedProduct.discount
+                      ? selectedProduct.discount + "%"
+                      : "0%"
+                  }}
+                </span>
+                <input
+                  *ngIf="isEditingDiscount"
+                  [(ngModel)]="selectedProduct.discount"
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  placeholder="Enter discount"
+                />
+              </div>
+              <button
+                *ngIf="!isEditingDiscount"
+                (click)="toggleEditDiscount()"
+                class="text-gray-500 hover:text-[var(--main-color)] transition-colors duration-200"
+                aria-label="Edit discount"
+              >
+                <i class="fa-solid fa-pen"></i>
+              </button>
+            </div>
+            <!-- Status -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Status:</strong>
+              <div class="flex-1">
+                <span
+                  class="px-3 py-1 rounded-full text-sm font-medium"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800':
+                      selectedProduct.status === 'Active',
+                    'bg-yellow-100 text-yellow-800':
+                      selectedProduct.status === 'OutOfStock',
+                    'bg-red-100 text-red-800':
+                      selectedProduct.status === 'Banned',
+                    'bg-gray-100 text-gray-800':
+                      selectedProduct.status === 'Pending'
+                  }"
+                >
+                  {{
+                    selectedProduct.status === "OutOfStock"
+                      ? "Out of Stock"
+                      : selectedProduct.status
+                  }}
+                </span>
+              </div>
+            </div>
+            <!-- Total Quantity -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Total Quantity:</strong>
+              <div class="flex-1">
+                <span class="break-words">{{ selectedProduct.quantity }}</span>
+              </div>
+            </div>
+            <!-- Category -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Category:</strong>
+              <div class="flex-1">
+                <span class="break-words">{{
+                  selectedProduct.categoryName
+                }}</span>
+              </div>
+            </div>
+            <!-- Unit -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Unit:</strong>
+              <div class="flex-1">
+                <span class="break-words">{{ selectedProduct.unite }}</span>
+              </div>
+            </div>
+            <!-- Color -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Color:</strong>
+              <div class="flex-1">
+                <span class="break-words">{{
+                  selectedVariant?.color || "N/A"
+                }}</span>
+              </div>
+            </div>
+            <!-- Size -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Size:</strong>
+              <div class="flex-1">
+                <span class="break-words">{{
+                  selectedVariant?.size || "N/A"
+                }}</span>
+              </div>
+            </div>
+            <!-- Variant Quantity -->
+            <div *ngIf="selectedVariant" class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Quantity:</strong>
+              <div class="flex-1">
+                <span *ngIf="!isEditingVariantQuantity" class="break-words">
+                  {{ selectedVariant.quantity }}
+                </span>
+                <input
+                  *ngIf="isEditingVariantQuantity"
+                  [(ngModel)]="selectedVariant.quantity"
+                  type="number"
+                  min="0"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  placeholder="Enter variant quantity"
+                  required
+                />
+              </div>
+              <button
+                *ngIf="
+                  !isEditingVariantQuantity && selectedVariant.quantity != null
+                "
+                (click)="toggleEditVariantQuantity()"
+                class="text-gray-500 hover:text-[var(--main-color)] transition-colors duration-200"
+                aria-label="Edit variant quantity"
+              >
+                <i class="fa-solid fa-pen"></i>
+              </button>
+            </div>
+          </div>
+          <!-- Update Button -->
+          <div class="mt-6 flex justify-end">
+            <button
+              *ngIf="isChanged()"
+              (click)="saveProductDetails(); saveVariantQuantity()"
+              class="px-6 py-3 bg-[var(--main-color)] text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              Update Product
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Section -->
+    <div *ngIf="view === 'orders'" class="px-4 animate-fade-in">
+      <div class="flex-1">
+        <!-- Loading State -->
+        <div *ngIf="loading" class="text-center py-12">
+          <i class="fa-solid fa-spinner fa-spin text-4xl text-gray-400"></i>
+          <p class="text-xl font-semibold text-gray-600">Loading orders...</p>
+        </div>
+
+        <!-- No Orders Found -->
+        <div
+          *ngIf="!loading && paginatedOrders.length === 0"
+          class="text-center py-12"
+        >
+          <i
+            class="fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"
+          ></i>
+          <p class="text-xl font-semibold text-gray-600">No orders found</p>
+        </div>
+
+        <!-- Order Rows -->
+        <div
+          *ngIf="!loading && paginatedOrders.length > 0"
+          class="flex flex-col gap-4"
+        >
+          <!-- Header Row -->
+          <div
+            class="bg-gray-50 rounded-t-lg shadow-md p-4 flex items-center gap-4 border border-gray-200"
+          >
+            <div class="w-16 flex-shrink-0 text-gray-700 font-semibold text-sm">
+              Image
+            </div>
+            <div class="grid grid-cols-4 gap-4 items-center flex-1">
+              <p class="text-gray-700 font-semibold text-sm">Product Name</p>
+              <p class="text-gray-700 font-semibold text-sm">Price</p>
+              <p class="text-gray-700 font-semibold text-sm">Quantity</p>
+              <p class="text-gray-700 font-semibold text-sm">Status</p>
+            </div>
+          </div>
+
+          <!-- Order Rows -->
+          <div
+            *ngFor="let order of paginatedOrders; trackBy: trackByOrderId"
+            class="bg-white rounded-lg shadow-md p-4 flex items-center gap-4 cursor-pointer border border-gray-200 animate-fade-in"
+            (click)="selectOrder(order)"
+          >
+            <img
+              class="w-16 h-16 object-cover rounded"
+              [src]="
+                order.imageUrl ||
+                'https://via.placeholder.com/300x300?text=300+x+300'
+              "
+              [alt]="order.productName"
+            />
+            <div class="flex-1 grid grid-cols-4 gap-4 items-center">
+              <h3
+                class="text-lg font-bold text-gray-900 truncate"
+                [title]="order.productName"
+              >
+                {{ order.productName || "N/A" }}
+              </h3>
+              <p class="text-gray-600 text-sm">
+                <strong class="font-semibold">Price:</strong>
+                <span class="text-gray-800 font-medium"
+                  >${{ order.price || "N/A" }}</span
+                >
+              </p>
+              <p class="text-gray-600 text-sm">
+                <strong class="font-semibold">Quantity:</strong>
+                <span class="text-gray-800 font-medium">{{
+                  order.quantity || "N/A"
+                }}</span>
+              </p>
+              <p class="text-gray-600 text-sm">
+                <strong class="font-semibold">Status:</strong>
+                <span
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                  [ngClass]="{
+                    'bg-yellow-100 text-yellow-800': order.status === 'Pending',
+                    'bg-orange-100 text-orange-800':
+                      order.status === 'Preparing',
+                    'bg-blue-100 text-blue-800': order.status === 'InProgress',
+                    'bg-green-100 text-green-800': order.status === 'Recieved'
+                  }"
+                >
+                  <i class="fa-solid fa-check mr-1"></i>
+                  {{ order.status || "N/A" }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          class="flex justify-center mt-6"
+          *ngIf="!loading && paginatedOrders.length !== 0"
+        >
+          <nav class="inline-flex rounded-lg bg-white shadow-sm">
+            <button
+              [disabled]="currentPage === 1"
+              (click)="changePage(currentPage - 1)"
+              class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400 hover:bg-gray-100 transition-colors duration-300"
+            >
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button
+              *ngFor="let page of pageNumbers"
+              (click)="changePage(page)"
+              class="px-4 py-2 cursor-pointer"
+              [ngClass]="{
+                'bg-[var(--main-color)] text-white rounded-full':
+                  currentPage === page,
+                'hover:bg-gray-100': currentPage !== page
+              }"
+            >
+              {{ page }}
+            </button>
+            <button
+              [disabled]="currentPage === totalPages"
+              (click)="changePage(currentPage + 1)"
+              class="px-4 py-2 cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400 hover:bg-gray-100 transition-colors duration-300"
+            >
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Details View -->
+    <div
+      *ngIf="view === 'order-details' && selectedOrder"
+      class="p-8 bg-white rounded-xl shadow-md animate-fade-in"
+    >
+      <!-- Error Message -->
+      <div
+        *ngIf="errorMessage"
+        class="p-4 bg-red-100 text-red-700 rounded-lg mb-6 animate-fade-in flex items-center"
+      >
+        <i class="fa-solid fa-exclamation-circle mr-2"></i> {{ errorMessage }}
+      </div>
+
+      <!-- Back Button -->
+      <button
+        (click)="setView('orders')"
+        class="mb-6 text-[var(--main-color)] hover:bg-[var(--main-color)] hover:text-white px-4 py-2 rounded-lg flex items-center cursor-pointer transition-all duration-300"
+      >
+        <svg
+          class="w-5 h-5 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        Back to Orders
+      </button>
+
+      <!-- Order Details -->
+      <h1 class="text-4xl font-bold mb-8 text-gray-800 tracking-tight">
+        Order #{{ selectedOrder.id }} - {{ selectedOrder.productName }}
+      </h1>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Image Section -->
+        <div class="flex-1">
+          <img
+            [src]="
+              selectedOrder.imageUrl ||
+              'https://via.placeholder.com/300x300?text=300+x+300'
+            "
+            [alt]="selectedOrder.productName"
+            class="w-full object-contain rounded-xl shadow-md transition-all duration-300"
+          />
+        </div>
+        <!-- Order Info -->
+        <div class="md:col-span-2">
+          <h3 class="font-semibold text-xl text-gray-800 mb-4">
+            Order Details
+          </h3>
+          <div class="text-gray-700">
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Product Name:</strong>
+              <span>{{ selectedOrder.productName || "N/A" }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Color:</strong>
+              <span>{{ selectedOrder.color || "N/A" }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Size:</strong>
+              <span>{{ selectedOrder.size || "N/A" }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Quantity:</strong>
+              <span>{{ selectedOrder.quantity || "N/A" }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Price:</strong>
+              <span>${{ selectedOrder.price || "N/A" }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Merchant:</strong>
+              <span>{{ selectedOrder.merchantName || "N/A" }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Status:</strong>
+              <div>
+                <span
+                  *ngIf="!isEditingOrderStatus"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                  [ngClass]="{
+                    'bg-yellow-100 text-yellow-800':
+                      selectedOrder.status === 'Pending',
+                    'bg-orange-100 text-orange-800':
+                      selectedOrder.status === 'Preparing',
+                    'bg-blue-100 text-blue-800':
+                      selectedOrder.status === 'InProgress',
+                    'bg-green-100 text-green-800':
+                      selectedOrder.status === 'Recieved'
+                  }"
+                >
+                  <i class="fa-solid fa-check mr-1"></i>
+                  {{ selectedOrder.status || "N/A" }}
+                </span>
+                <select
+                  *ngIf="isEditingOrderStatus"
+                  [(ngModel)]="selectedOrder.status"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  [disabled]="getOrderStatusOptionsWithCurrent().length === 0"
+                >
+                  <option
+                    *ngFor="let status of getOrderStatusOptionsWithCurrent()"
+                    [value]="status"
+                  >
+                    {{ status }}
+                  </option>
+                </select>
+              </div>
+              <button
+                *ngIf="
+                  !isEditingOrderStatus && selectedOrder.status === 'Pending'
+                "
+                (click)="toggleEditOrderStatus()"
+                class="text-gray-500 hover:text-[var(--main-color)] transition-colors duration-200"
+                aria-label="Edit order status"
+              >
+                <i class="fa-solid fa-pen"></i>
+              </button>
+            </div>
+          </div>
+          <!-- Update Button -->
+          <div class="mt-6 flex justify-end">
+            <button
+              *ngIf="isChanged()"
+              (click)="saveOrderStatus()"
+              class="px-6 py-3 bg-[var(--main-color)] cursor-pointer text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              Update Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Product View -->
+    <div
+      *ngIf="view === 'add-product'"
+      class="p-8 bg-white rounded-lg shadow-md animate-fade-in max-w-5xl mx-auto"
+    >
+      <!-- Error Message -->
+      <div
+        *ngIf="errorMessage"
+        class="p-4 bg-red-100 text-red-700 rounded-lg mb-6 animate-fade-in flex items-center"
+      >
+        <i class="fa-solid fa-exclamation-circle mr-2"></i> {{ errorMessage }}
+      </div>
+
+      <!-- Back Button -->
+      <button
+        (click)="setView('products')"
+        class="mb-6 text-[var(--main-color)] hover:bg-[var(--main-color)] hover:text-white px-4 py-2 rounded-lg flex items-center cursor-pointer transition-all duration-300 shadow-sm"
+      >
+        <svg
+          class="w-5 h-5 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        Back to Products
+      </button>
+
+      <!-- Progress Bar -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 text-center">
+            <div
+              class="flex items-center justify-center w-10 h-10 mx-auto rounded-full"
+              [ngClass]="{
+                'bg-[var(--main-color)] text-white': currentStep >= 1,
+                'bg-gray-300 text-gray-600': currentStep < 1
+              }"
+            >
+              <i class="fa-solid fa-info-circle"></i>
+            </div>
+            <p
+              class="mt-2 text-sm font-semibold"
+              [ngClass]="{
+                'text-[var(--main-color)]': currentStep >= 1,
+                'text-gray-600': currentStep < 1
+              }"
+            >
+              Basic Info
+            </p>
+          </div>
+          <div class="flex-1">
+            <div
+              class="h-1 bg-gray-300 rounded-full"
+              [ngClass]="{
+                'bg-[var(--main-color)]': currentStep >= 2
+              }"
+            ></div>
+          </div>
+          <div class="flex-1 text-center">
+            <div
+              class="flex items-center justify-center w-10 h-10 mx-auto rounded-full"
+              [ngClass]="{
+                'bg-[var(--main-color)] text-white': currentStep >= 2,
+                'bg-gray-300 text-gray-600': currentStep < 2
+              }"
+            >
+              <i class="fa-solid fa-image"></i>
+            </div>
+            <p
+              class="mt-2 text-sm font-semibold"
+              [ngClass]="{
+                'text-[var(--main-color)]': currentStep >= 2,
+                'text-gray-600': currentStep < 2
+              }"
+            >
+              Images & Variants
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Product Form -->
+      <h1 class="text-4xl font-bold mb-8 text-gray-800 tracking-tight">
+        Add New Product
+      </h1>
+
+      <!-- Step 1: Basic Info -->
+      <div
+        *ngIf="currentStep === 1"
+        class="grid grid-cols-1 gap-8 animate-fade-in"
+      >
+        <div>
+          <div class="text-gray-700 flex flex-col gap-4">
+            <!-- Title -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Title:</strong>
+              <div class="flex-1">
+                <input
+                  [(ngModel)]="newProduct.title"
+                  type="text"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  placeholder="Enter product title"
+                  required
+                />
+              </div>
+            </div>
+            <!-- Description -->
+            <div class="flex items-start gap-3">
+              <strong class="w-28 font-semibold">Description:</strong>
+              <div class="flex-1">
+                <textarea
+                  [(ngModel)]="newProduct.description"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  placeholder="Enter product description"
+                  rows="4"
+                ></textarea>
+              </div>
+            </div>
+            <!-- Category -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Category:</strong>
+              <div class="flex-1">
+                <input
+                  [(ngModel)]="newProduct.categoryName"
+                  type="text"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  placeholder="Enter category (e.g., shirt)"
+                  required
+                />
+              </div>
+            </div>
+            <!-- Type -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Type:</strong>
+              <div class="flex-1">
+                <select
+                  [(ngModel)]="newProduct.type"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  required
+                >
+                  <option value="" disabled selected>Select type</option>
+                  <option value="tops">Tops</option>
+                  <option value="bottoms">Bottoms</option>
+                  <option value="one-pieces">One-Pieces</option>
+                </select>
+              </div>
+            </div>
+            <!-- Unit Price -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Price ($):</strong>
+              <div class="flex-1">
+                <input
+                  [(ngModel)]="newProduct.unitPrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  placeholder="Enter unit price"
+                  required
+                />
+              </div>
+            </div>
+            <!-- Discount -->
+            <div class="flex items-center gap-3">
+              <strong class="w-28 font-semibold">Discount (%):</strong>
+              <div class="flex-1">
+                <input
+                  [(ngModel)]="newProduct.discount"
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                  placeholder="Enter discount (0-100)"
+                />
+              </div>
+            </div>
+          </div>
+          <!-- Next Button -->
+          <div class="mt-6 flex justify-end gap-4">
+            <button
+              (click)="addNewProduct()"
+              class="px-6 py-3 bg-[var(--main-color)] text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Step 2: Images & Variants (Dynamic) -->
+      <div
+        *ngIf="currentStep === 2"
+        class="grid grid-cols-1 gap-8 animate-fade-in"
+      >
+        <div>
+          <div class="text-gray-700">
+            <!-- Variant Groups (Per Color Combination) -->
+            <div
+              *ngFor="let variant of variants; let i = index"
+              class="border rounded-lg p-4 shadow-sm relative mb-6"
+            >
+              <h3 class="text-lg font-semibold mb-4 text-gray-800">
+                Variant {{ i + 1 }} (Color Combination)
+              </h3>
+              <!-- Remove Variant Button -->
+              <button
+                *ngIf="variants.length > 1"
+                (click)="removeVariant(i)"
+                class="absolute top-4 right-4 text-red-500 hover:text-red-700"
+                title="Remove Variant"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
+              <div class="">
+                <!-- Color Selection (Multiple Checkboxes with Colors) -->
+                <div class="flex items-center gap-3 mb-4">
+                  <strong class="w-28 font-semibold">Colors:</strong>
+                  <div class="flex-1">
+                    <div class="grid grid-cols-5 gap-2">
+                      <label
+                        *ngFor="let color of colors"
+                        class="flex items-center"
+                      >
+                        <input
+                          type="checkbox"
+                          (change)="onColorChange($event, i, color)"
+                          [checked]="variant.color.includes(color)"
+                          class="mr-2 appearance-none w-8 h-8 border-2 border-gray-300 rounded-sm checked:bg-current checked:border-4 checked:border-[var(--main-color)] transition-colors duration-200"
+                          [style.backgroundColor]="
+                            color === '#FFFFFF'
+                              ? '#f0f0f0'
+                              : color === '#000000'
+                              ? '#333'
+                              : color
+                          "
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <!-- Images -->
+                <div class="flex items-center gap-3 mb-4">
+                  <strong class="w-28 font-semibold">Images:</strong>
+                  <div class="flex-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      (change)="onImageUpload($event, i, 0)"
+                      class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200 mb-2"
+                      required
+                      *ngIf="variant.images.length < 1 || !variant.images[0]"
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      (change)="onImageUpload($event, i, 1)"
+                      class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200 mb-2"
+                      *ngIf="variant.images.length < 2 || !variant.images[1]"
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      (change)="onImageUpload($event, i, 2)"
+                      class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                      *ngIf="variant.images.length < 3 || !variant.images[2]"
+                    />
+                    <!-- Image Previews -->
+                    <div class="mt-2 flex gap-2">
+                      <div
+                        *ngFor="let image of variant.images; let j = index"
+                        class="relative"
+                      >
+                        <img
+                          [src]="getImagePreview(image!)"
+                          class="w-32 h-32 object-cover rounded-lg"
+                          alt="Variant Image Preview {{ j + 1 }}"
+                        />
+                        <button
+                          (click)="removeImage(i, j)"
+                          class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                          title="Remove Image"
+                        >
+                          <i class="fa-solid fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <p
+                      *ngIf="variant.images.length === 0"
+                      class="text-red-500 text-sm mt-1"
+                    >
+                      At least one image is required
+                    </p>
+                  </div>
+                </div>
+                <!-- Sizes and Quantities -->
+                <div class="mb-4">
+                  <div class="flex items-center gap-3 mb-2">
+                    <strong class="w-28 font-semibold"
+                      >Sizes & Quantities:</strong
+                    >
+                    <div class="flex-1">
+                      <p class="text-sm text-gray-600">
+                        Select sizes and quantities for this color combination
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    *ngFor="let size of variant.sizes; let j = index"
+                    class="grid grid-cols-3 gap-4 items-center mb-2"
+                  >
+                    <select
+                      [(ngModel)]="variant.sizes[j]"
+                      class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                      required
+                    >
+                      <option value="" disabled>Select size</option>
+                      <option value="S">Small (S)</option>
+                      <option value="M">Medium (M)</option>
+                      <option value="L">Large (L)</option>
+                      <option value="XL">Extra Large (XL)</option>
+                      <option value="XXL">Extra Extra Large (XXL)</option>
+                    </select>
+                    <input
+                      [(ngModel)]="variant.quantities[j]"
+                      type="number"
+                      min="0"
+                      class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                      placeholder="Quantity"
+                      required
+                      (ngModelChange)="updateTotalQuantity(i)"
+                    />
+                    <button
+                      *ngIf="variant.sizes.length > 1"
+                      (click)="removeSize(i, j)"
+                      class="text-red-500 hover:text-red-700"
+                      title="Remove Size"
+                    >
+                      <i class="fa-solid fa-minus-circle"></i>
+                    </button>
+                  </div>
+                  <!-- Add Size Button -->
+                  <button
+                    (click)="addSize(i)"
+                    class="mt-2 text-[var(--main-color)] hover:text-[var(--hover-color)] flex items-center text-sm"
+                  >
+                    <i class="fa-solid fa-plus mr-1"></i> Add Size
+                  </button>
+                </div>
+                <!-- Total Quantity for Color -->
+                <div class="flex items-center gap-3">
+                  <strong class="w-28 font-semibold">Total Quantity:</strong>
+                  <div class="flex-1">
+                    <input
+                      [(ngModel)]="variant.totalQuantity"
+                      type="number"
+                      min="0"
+                      class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--main-color)] bg-white shadow-sm transition-all duration-200"
+                      placeholder="Total quantity for this color combination"
+                      required
+                      [disabled]="true"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Add New Variant Button -->
+            <button
+              (click)="addVariant()"
+              class="mt-4 text-[var(--main-color)] hover:bg-[var(--main-color)] hover:text-white px-4 py-2 rounded-lg flex items-center cursor-pointer transition-all duration-300 shadow-sm"
+            >
+              <i class="fa-solid fa-plus mr-2"></i> Add New Variant
+            </button>
+          </div>
+          <!-- Back and Submit Buttons -->
+          <div class="mt-6 flex justify-between gap-4">
+            <button
+              [disabled]="productCreated"
+              (click)="setView('products')"
+              class="px-6 py-3 bg-gray-500 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Back
+            </button>
+            <button
+              [disabled]="loading"
+              (click)="submitVariants()"
+              class="px-6 py-3 bg-[var(--main-color)] text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer flex items-center"
+            >
+              {{ loading ? "Submitting..." : "Submit" }}
+              <i *ngIf="loading" class="fa-solid fa-spinner fa-spin ml-2"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
