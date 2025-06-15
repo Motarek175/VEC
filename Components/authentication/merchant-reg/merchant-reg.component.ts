@@ -53,7 +53,7 @@ export class MerchantRegComponent {
       Validators.required,
       Validators.minLength(14),
       Validators.maxLength(14),
-      Validators.pattern(/^[0-9]$/),
+      Validators.pattern(/^[0-9]+$/),
     ]),
   });
 
