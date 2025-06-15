@@ -397,12 +397,34 @@
                 *ngIf="
                   registerForm.get('nationalId')?.touched &&
                   registerForm.get('nationalId')?.value &&
+                  registerForm.get('nationalId')?.hasError('minlength')
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                minimum length is 14
+              </p>
+              <p
+                *ngIf="
+                  registerForm.get('nationalId')?.touched &&
+                  registerForm.get('nationalId')?.value &&
+                  registerForm.get('nationalId')?.hasError('maxlength')
+                "
+                class="text-red-500"
+              >
+                <span class="inline-block w-4">✘</span>
+                maximum length is 14
+              </p>
+              <p
+                *ngIf="
+                  registerForm.get('nationalId')?.touched &&
+                  registerForm.get('nationalId')?.value &&
                   registerForm.get('nationalId')?.hasError('pattern')
                 "
                 class="text-red-500"
               >
                 <span class="inline-block w-4">✘</span>
-                National ID must be 14 digits
+                should be numbers only
               </p>
             </div>
           </div>

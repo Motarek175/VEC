@@ -49,7 +49,12 @@ export class MerchantRegComponent {
     governorate: new FormControl('', [Validators.required]),
     location: new FormControl('', [Validators.required]),
     gender: new FormControl('', [Validators.required]),
-    nationalId: new FormControl('', [Validators.required]),
+    nationalId: new FormControl('', [
+      Validators.required,
+      Validators.minLength(14),
+      Validators.maxLength(14),
+      Validators.pattern(/^[0-9]$/),
+    ]),
   });
 
   checkMatch() {
@@ -90,12 +95,9 @@ export class MerchantRegComponent {
         },
         error: (err) => {
           console.log(err);
-          const parsed = JSON.parse(err.error);
-          let errMessage: string = '';
-          errMessage = parsed.message;
           Swal.fire({
             title: 'Error',
-            text: errMessage,
+            text: err.error.message,
             icon: 'error',
             confirmButtonColor: '#ef4444',
           });
