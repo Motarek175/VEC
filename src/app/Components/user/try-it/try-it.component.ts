@@ -5,11 +5,12 @@ import { Router, RouterLink } from '@angular/router';
 import { CustomerService } from '../../../Core/services/customer.service';
 import { interval, Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-try-it',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule],
   templateUrl: './try-it.component.html',
   styleUrl: './try-it.component.css',
 })
